@@ -84,8 +84,14 @@ function App() {
       let data;
       try { data = raw ? JSON.parse(raw) : {}; } catch { data = { detail: raw || "The server returned an unreadable response." }; }
       if (!response.ok) {
-        const message = typeof data?.detail === "string" ? data.detail : `Request failed (${response.status}). Please try again.`;
-        throw new Error(message);
+        const detail = typeof data?.detail === "string" ? data.detail : "";
+        if (response.status === 503) {
+          throw new Error(detail || "The AI provider is temporarily unavailable or overloaded. Please wait a few minutes and try again.");
+        }
+        if (response.status === 429) {
+          throw new Error(detail || "The AI service rate limit has been reached. Please wait before trying again.");
+        }
+        throw new Error(detail || `Request failed (${response.status}). Please try again.`);
       }
       setResult({ data, text: extractOutput(data, activeTool), createdAt: new Date() });
     } catch (err) {
@@ -162,7 +168,7 @@ function App() {
             <div className="breadcrumb">Workspace <span>/</span> <strong>{currentTool.label}</strong></div>
           </div>
           <div className="topbar-right">
-            <div className={`service-status ${apiStatus}`}><span className="status-dot"/>{apiStatus === "checking" ? "Checking service" : apiStatus === "online" ? "AI service connected" : "Service unavailable"}</div>
+            <div className={`service-status ${apiStatus}`}><span className="status-dot"/>{apiStatus === "checking" ? "Checking backend" : apiStatus === "online" ? "Backend online · AI not tested" : "Backend unavailable"}</div>
             <button className="icon-btn theme-btn" onClick={() => setDark(!dark)} aria-label="Toggle theme">{dark ? <Sun size={18}/> : <Moon size={18}/>}</button>
             <button className="help-btn" onClick={() => setShowDetails(!showDetails)}><CircleHelp size={17}/> Help</button>
           </div>
