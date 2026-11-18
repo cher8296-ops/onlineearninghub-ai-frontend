@@ -121,7 +121,7 @@ function App() {
     try {
       const response = await fetch(`${API_BASE}/${activeTool}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        headers: { "Content-Type": "application/json", "Accept": "application/json", ...(sessionStorage.getItem("oeh-session-token") ? { Authorization: "Bearer " + sessionStorage.getItem("oeh-session-token") } : {}) },
         body: JSON.stringify({ description }),
         signal: AbortSignal.timeout(120000)
       });
@@ -131,6 +131,10 @@ function App() {
       catch { data = { detail: raw || "The server returned an unreadable response." }; }
       if (!response.ok) {
         const detail = typeof data?.detail === "string" ? data.detail : "";
+        if (response.status === 401 && detail.toLowerCase().includes("sign in")) {
+          setView("account");
+          throw new Error("Please create an account or sign in to use the AI workspace and save your history.");
+        }
         if (response.status === 503) throw new Error(detail || "The AI provider is temporarily unavailable or overloaded. Your request was not completed. Please wait a few minutes and retry.");
         if (response.status === 429) throw new Error(detail || "The AI usage limit has been reached. Please wait before trying again.");
         if (response.status === 401 || response.status === 403) throw new Error(detail || "The AI service rejected this request. Please check the server configuration.");
