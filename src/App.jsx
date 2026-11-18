@@ -67,7 +67,8 @@ function App() {
     setApiStatus("checking");
     try {
       const response = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(12000), cache: "no-store" });
-      setApiStatus(response.ok ? "online" : "issue");
+      const health = response.ok ? await response.json() : null;
+      setApiStatus(!response.ok ? "issue" : health?.ai_configured === false ? "not_configured" : "online");
       setHealthCheckedAt(new Date());
     } catch {
       setApiStatus("issue");
@@ -80,7 +81,8 @@ function App() {
     const run = async () => {
       try {
         const response = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(12000), cache: "no-store" });
-        if (!cancelled) { setApiStatus(response.ok ? "online" : "issue"); setHealthCheckedAt(new Date()); }
+        const health = response.ok ? await response.json() : null;
+        if (!cancelled) { setApiStatus(!response.ok ? "issue" : health?.ai_configured === false ? "not_configured" : "online"); setHealthCheckedAt(new Date()); }
       } catch {
         if (!cancelled) { setApiStatus("issue"); setHealthCheckedAt(new Date()); }
       }
@@ -112,7 +114,7 @@ function App() {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
         body: JSON.stringify({ description }),
-        signal: AbortSignal.timeout(90000)
+        signal: AbortSignal.timeout(50000)
       });
       const raw = await response.text();
       let data;
@@ -229,7 +231,7 @@ function App() {
           </div>
           <div className="topbar-right">
             <button className={`service-status ${apiStatus}`} onClick={checkHealth} title="Check backend availability">
-              <span className="status-dot"/><span>{apiStatus === "checking" ? "Checking backend" : apiStatus === "online" ? "Backend online" : "Backend unavailable"}</span><RefreshCw size={13} className={apiStatus === "checking" ? "spin" : ""}/>
+              <span className="status-dot"/><span>{apiStatus === "checking" ? "Checking backend" : apiStatus === "online" ? "AI configured" : apiStatus === "not_configured" ? "AI not configured" : "Service unavailable"}</span><RefreshCw size={13} className={apiStatus === "checking" ? "spin" : ""}/>
             </button>
             <span className="topbar-divider"/>
             <button className="icon-btn theme-btn" onClick={() => setDark(value => !value)} aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}>{dark ? <Sun size={18}/> : <Moon size={18}/>}</button>
@@ -277,8 +279,8 @@ function App() {
                 <form onSubmit={runTool}>
                   <label className="prompt-label" htmlFor="prompt">Tell us what you have in mind</label>
                   <div className="prompt-wrap">
-                    <textarea id="prompt" value={prompt} onChange={event => setPrompt(event.target.value)} placeholder={currentTool.placeholder} rows={5} maxLength={12000} required />
-                    <div className="prompt-footer"><span>{prompt.length.toLocaleString()} / 12,000</span><button type="button" className="sample-btn" onClick={() => { setPrompt(currentTool.sample); setError(""); }}>Use a sample prompt <ArrowUpRight size={13}/></button></div>
+                    <textarea id="prompt" value={prompt} onChange={event => setPrompt(event.target.value)} placeholder={currentTool.placeholder} rows={5} maxLength={10000} required />
+                    <div className="prompt-footer"><span>{prompt.length.toLocaleString()} / 10,000</span><button type="button" className="sample-btn" onClick={() => { setPrompt(currentTool.sample); setError(""); }}>Use a sample prompt <ArrowUpRight size={13}/></button></div>
                   </div>
                   <div className="form-bottom"><div className="privacy-note"><ShieldCheck size={15}/><span>Your API key stays on the server. Avoid sharing sensitive information.</span></div>
                     <button className="generate-btn" type="submit" disabled={busy || !prompt.trim()}>{busy ? <><LoaderCircle size={17} className="spin"/> Working...</> : <><Sparkles size={16}/> Generate response <ArrowRight size={16}/></>}</button>
