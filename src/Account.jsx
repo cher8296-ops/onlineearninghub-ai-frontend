@@ -16,6 +16,7 @@ export default function Account({ onClose }) {
   const [user,setUser]=useState(null);
   const [dashboard,setDashboard]=useState(null);
   const [admin,setAdmin]=useState(null);
+  const [adminUsers,setAdminUsers]=useState([]);
   const [mode,setMode]=useState("login");
   const [email,setEmail]=useState("");
   const [password,setPassword]=useState("");
@@ -42,7 +43,7 @@ export default function Account({ onClose }) {
         fetch(API+"/me/dashboard",{headers}).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.detail);return d;})
       ]);
       setUser(me);setDashboard(dash);
-      try{const a=await fetch(API+"/admin/analytics",{headers});if(a.ok)setAdmin(await a.json());else setAdmin(null);}catch{setAdmin(null);}
+      try{const a=await fetch(API+"/admin/analytics",{headers});if(a.ok){setAdmin(await a.json());const u=await fetch(API+"/admin/users",{headers});if(u.ok){const data=await u.json();setAdminUsers(data.users||[]);}}else{setAdmin(null);setAdminUsers([]);}}catch{setAdmin(null);setAdminUsers([]);}
     }catch(e){setError(e.message);setToken("");sessionStorage.removeItem(TOKEN_KEY);}
   };
   useEffect(()=>{
@@ -91,7 +92,7 @@ export default function Account({ onClose }) {
     <article className="account-card"><h3><MessageCircle size={17}/>{t.chatTitle}</h3><div className="account-chatlog">{messages.map((m,i)=><div className={"account-message "+m.role} key={i}>{m.text}</div>)}</div><form className="account-chatform" onSubmit={sendChat}><textarea value={chat} onChange={e=>setChat(e.target.value)} placeholder={t.message} maxLength={10000}/><button disabled={busy||!chat.trim()}><Send size={15}/>{t.send}</button></form></article>
     <article className="account-card"><h3><Star size={17}/>{t.feedback}</h3><form onSubmit={sendFeedback}><label>{t.rating}<select value={rating} onChange={e=>setRating(Number(e.target.value))}>{[5,4,3,2,1].map(n=><option value={n} key={n}>{n} / 5</option>)}</select></label><label><textarea value={feedback} onChange={e=>setFeedback(e.target.value)} placeholder={t.feedbackText} maxLength={2000}/></label><button className="account-primary" disabled={busy}>{t.submit}</button></form></article>
     {user.plan!=="premium"&&<article className="account-card premium-card"><h3><Crown size={17}/>{t.upgrade}</h3><p>{t.premiumInfo}</p><button className="account-primary" onClick={checkout} disabled={busy}>{t.checkout}</button></article>}
-    {admin&&<article className="account-card admin-card"><h3><ShieldCheck size={17}/>{t.admin}</h3><div className="account-stats"><div><span>{t.users}</span><strong>{admin.users}</strong></div><div><span>{t.pageViews}</span><strong>{admin.page_views}</strong></div><div><span>AI requests (30d)</span><strong>{admin.ai_requests}</strong></div><div><span>Feedback</span><strong>{admin.feedback_count}</strong></div></div></article>}
+    {admin&&<article className="account-card admin-card"><h3><ShieldCheck size={17}/>{t.admin}</h3><div className="account-stats"><div><span>{t.users}</span><strong>{admin.users}</strong></div><div><span>{t.pageViews}</span><strong>{admin.page_views}</strong></div><div><span>AI requests (30d)</span><strong>{admin.ai_requests}</strong></div><div><span>Feedback</span><strong>{admin.feedback_count}</strong></div></div><div className="admin-user-list"><strong>Latest accounts</strong>{adminUsers.map(item=><div key={item.id}><span>{item.email}</span><small>{item.plan} · {item.verified?"verified":"unverified"}</small></div>)}</div></article>}
     </div><button className="account-refresh" onClick={()=>refresh()}><RefreshCw size={14}/>{t.refresh}</button></>}
   </section>;
 }
