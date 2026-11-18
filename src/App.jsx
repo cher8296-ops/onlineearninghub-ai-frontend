@@ -231,7 +231,7 @@ function App() {
           </div>
           <div className="topbar-right">
             <button className={`service-status ${apiStatus}`} onClick={checkHealth} title="Check backend availability">
-              <span className="status-dot"/><span>{apiStatus === "checking" ? "Checking backend" : apiStatus === "online" ? "AI configured" : apiStatus === "not_configured" ? "AI not configured" : "Service unavailable"}</span><RefreshCw size={13} className={apiStatus === "checking" ? "spin" : ""}/>
+              <span className="status-dot"/><span>{apiStatus === "checking" ? "Checking backend" : apiStatus === "online" ? "Backend online" : apiStatus === "not_configured" ? "AI not configured" : "Service unavailable"}</span><RefreshCw size={13} className={apiStatus === "checking" ? "spin" : ""}/>
             </button>
             <span className="topbar-divider"/>
             <button className="icon-btn theme-btn" onClick={() => setDark(value => !value)} aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}>{dark ? <Sun size={18}/> : <Moon size={18}/>}</button>
