@@ -1,10 +1,13 @@
-name: Frontend build
+name: Frontend security and build
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -15,8 +18,11 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22.12.0"
+          cache: npm
       - name: Install dependencies
         run: npm install
+      - name: Audit production and development dependencies
+        run: npm audit --audit-level=high
       - name: Build production frontend
         run: npm run build
