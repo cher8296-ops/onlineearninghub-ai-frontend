@@ -54,7 +54,7 @@ export default function Account({ onClose }) {
       call("/auth/verify?token="+encodeURIComponent(verify),{method:"POST"}).then(()=>{setNotice("Email verified. Please sign in.");setMode("login");}).catch(e=>setError(e.message)).finally(()=>{params.delete("verify");const next=window.location.pathname+(params.toString()?"?"+params.toString():"");window.history.replaceState({},"",next);});
     }
   },[]);
-  useEffect(()=>{localStorage.setItem("oeh-language",lang);},[lang]);
+  useEffect(()=>{localStorage.setItem("oeh-language",lang);window.dispatchEvent(new Event("oeh-language-change"));},[lang]);
 
   const submitAuth=async e=>{
     e.preventDefault();setBusy(true);setError("");setNotice("");
