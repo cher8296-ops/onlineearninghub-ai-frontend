@@ -55,3 +55,8 @@
 @media(prefers-reduced-motion:reduce){.account-spin{animation:none}}
 
 .admin-user-list{display:grid;gap:7px;margin-top:14px}.admin-user-list>strong{font-size:10px;color:var(--ink)}.admin-user-list>div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--line);font-size:9px;color:var(--ink)}.admin-user-list small{color:var(--muted);white-space:nowrap}
+
+
+.main-language{display:flex;align-items:center;gap:4px;padding:5px 7px;border:1px solid var(--line);border-radius:8px;color:var(--muted);background:var(--paper)}
+.main-language select{width:39px;border:0;outline:0;background:transparent;color:inherit;font:700 9px 'DM Sans',sans-serif;cursor:pointer}
+.dark .main-language{background:#151f30;border-color:#344258;color:#c5cee0}
