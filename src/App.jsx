@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import Account from "./Account.jsx";
 import {
   ArrowRight, ArrowUpRight, Check, CheckCircle2, ChevronRight, Clipboard,
   Clock3, Command, FileCheck2, Globe2, History, Layers3, LoaderCircle,
@@ -192,6 +193,9 @@ function App() {
           <button className={`nav-item ${view === "history" ? "active" : ""}`} onClick={() => { setView("history"); setMobileNav(false); }}>
             <span className="nav-icon neutral"><History size={17}/></span><span>Recent activity</span><span className="nav-count">{history.length}</span>
           </button>
+          <button className={`nav-item ${view === "account" ? "active" : ""}`} onClick={() => { setView("account"); setMobileNav(false); }}>
+            <span className="nav-icon neutral"><ShieldCheck size={17}/></span><span>Account & plans</span>
+          </button>
         </nav>
 
         <div className="nav-caption tools-caption">AI CAPABILITIES</div>
@@ -227,7 +231,7 @@ function App() {
         <header className="topbar">
           <div className="topbar-left">
             <button className="icon-btn mobile-menu" onClick={() => setMobileNav(true)} aria-label="Open menu"><Menu size={20}/></button>
-            <div className="breadcrumb"><span>OnlineEarningHub</span><b>/</b><strong>{view === "history" ? "Recent activity" : currentTool.short}</strong></div>
+            <div className="breadcrumb"><span>OnlineEarningHub</span><b>/</b><strong>{view === "history" ? "Recent activity" : view === "account" ? "Account & plans" : currentTool.short}</strong></div>
           </div>
           <div className="topbar-right">
             <button className={`service-status ${apiStatus}`} onClick={checkHealth} title="Check backend availability">
@@ -240,7 +244,7 @@ function App() {
         </header>
 
         <div className="content">
-          {view === "workspace" ? (
+          {view === "account" ? <Account onClose={() => setView("workspace")} /> : view === "workspace" ? (
             <>
               <section className="hero">
                 <div className="hero-copy">
