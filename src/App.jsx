@@ -114,7 +114,7 @@ function App() {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
         body: JSON.stringify({ description }),
-        signal: AbortSignal.timeout(50000)
+        signal: AbortSignal.timeout(120000)
       });
       const raw = await response.text();
       let data;
