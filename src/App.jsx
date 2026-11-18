@@ -1,29 +1,37 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  ArrowRight, ArrowUpRight, Check, CheckCircle2, ChevronDown, CircleHelp,
-  Clipboard, Clock3, Command, FileCheck2, FileText, Globe2, Layers3,
-  LoaderCircle, Menu, MessageSquareText, Microscope, Moon, MoreHorizontal,
-  PanelLeftClose, PenLine, RefreshCw, ShieldCheck, Sparkles, Sun, WandSparkles,
-  X, Zap
+  ArrowRight, ArrowUpRight, Check, CheckCircle2, ChevronRight, Clipboard,
+  Clock3, Command, FileCheck2, Globe2, History, Layers3, LoaderCircle,
+  Menu, Microscope, Moon, PenLine, Plus, RefreshCw, ShieldCheck, Sparkles,
+  Sun, WandSparkles, X, Zap, Trash2, Copy, ExternalLink
 } from "lucide-react";
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || "https://onlineearninghub-ai.onrender.com").replace(/\/+$/, "");
+const HISTORY_KEY = "oeh-ai-history-v1";
+const THEME_KEY = "oeh-ai-theme-v1";
 
 const tools = [
-  { id: "plan", label: "Plan", subtitle: "Turn goals into clear action plans", icon: Layers3, tint: "violet", placeholder: "Describe a goal, project, or challenge. Include your timeline and constraints for a more useful plan.", sample: "Create a practical 7-day plan to launch a beginner freelance writing service." },
-  { id: "write", label: "Write", subtitle: "Create polished, useful content", icon: PenLine, tint: "blue", placeholder: "Tell us what you need written, who it is for, and the tone you want.", sample: "Write a professional proposal for a beginner applying to a blog writing job." },
-  { id: "research", label: "Research", subtitle: "Explore a topic and understand it", icon: Microscope, tint: "amber", placeholder: "Describe the topic you want to understand. Be specific about the questions you need answered.", sample: "Explain how beginners can find legitimate remote freelance writing clients." },
-  { id: "check", label: "Quality check", subtitle: "Review work and find improvements", icon: FileCheck2, tint: "green", placeholder: "Paste the actual text you want reviewed, then say what you want checked.", sample: "Review this proposal for clarity, grammar, professionalism, and completeness: [paste your proposal here]" }
+  { id: "plan", label: "Strategic planner", short: "Plan", subtitle: "Turn ambitious goals into clear next steps", icon: Layers3, tint: "violet", eyebrow: "THINK WITH CLARITY", placeholder: "What are you trying to achieve? Share your goal, timeline, resources and constraints.", sample: "Build a practical 30-day plan to launch a beginner-friendly freelance writing service. Include weekly milestones, daily actions, free tools, risks and measurable outcomes." },
+  { id: "write", label: "Content studio", short: "Write", subtitle: "Create thoughtful, polished communication", icon: PenLine, tint: "blue", eyebrow: "COMMUNICATE WITH IMPACT", placeholder: "What do you need to create? Include the audience, purpose, format and tone.", sample: "Write a compelling, professional proposal for a beginner applying for a remote blog-writing opportunity. Make it confident, specific and honest about my experience." },
+  { id: "research", label: "Research desk", short: "Research", subtitle: "Understand topics, options and opportunities", icon: Microscope, tint: "amber", eyebrow: "DISCOVER WHAT MATTERS", placeholder: "What topic or question should we explore? Add your location, context or decision if relevant.", sample: "Research practical ways for a beginner in Ethiopia to find legitimate international remote freelance work. Explain where to look, eligibility, common scams and first steps. Clearly distinguish verified facts from general guidance." },
+  { id: "check", label: "Quality review", short: "Review", subtitle: "Strengthen work before it goes out", icon: FileCheck2, tint: "green", eyebrow: "RAISE YOUR STANDARD", placeholder: "Paste the work you want reviewed. Tell us the audience and what a successful result should achieve.", sample: "Review the following text for clarity, grammar, tone, structure and persuasiveness. Give a concise assessment, identify specific weaknesses and provide an improved version:\n\n[Paste your text here]" }
 ];
 
+function readHistory() {
+  try {
+    const value = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+    return Array.isArray(value) ? value.slice(0, 12) : [];
+  } catch { return []; }
+}
+
 function extractOutput(data, toolId) {
-  const candidates = {
+  const keys = {
     plan: ["plan", "content", "result", "output"],
     write: ["content", "written_content", "result", "output"],
     research: ["findings", "content", "result", "output"],
     check: ["review", "feedback", "result", "output"]
   }[toolId] || ["result", "output", "content"];
-  for (const key of candidates) {
+  for (const key of keys) {
     if (typeof data?.[key] === "string" && data[key].trim()) return data[key];
   }
   return JSON.stringify(data, null, 2);
@@ -31,34 +39,59 @@ function extractOutput(data, toolId) {
 
 function App() {
   const [activeTool, setActiveTool] = useState("plan");
+  const [view, setView] = useState("workspace");
   const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const [mobileNav, setMobileNav] = useState(false);
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(() => {
+    try { return localStorage.getItem(THEME_KEY) === "dark"; } catch { return false; }
+  });
   const [apiStatus, setApiStatus] = useState("checking");
-  const [showDetails, setShowDetails] = useState(false);
+  const [history, setHistory] = useState(readHistory);
+  const [healthCheckedAt, setHealthCheckedAt] = useState(null);
 
-  const currentTool = useMemo(() => tools.find(t => t.id === activeTool) || tools[0], [activeTool]);
+  const currentTool = useMemo(() => tools.find(item => item.id === activeTool) || tools[0], [activeTool]);
+
+  useEffect(() => {
+    try { localStorage.setItem(THEME_KEY, dark ? "dark" : "light"); } catch {}
+  }, [dark]);
+
+  useEffect(() => {
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 12))); } catch {}
+  }, [history]);
+
+  const checkHealth = async () => {
+    setApiStatus("checking");
+    try {
+      const response = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(12000), cache: "no-store" });
+      setApiStatus(response.ok ? "online" : "issue");
+      setHealthCheckedAt(new Date());
+    } catch {
+      setApiStatus("issue");
+      setHealthCheckedAt(new Date());
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
-    const check = async () => {
+    const run = async () => {
       try {
-        const response = await fetch(`${API_BASE}/health`, { method: "GET", signal: AbortSignal.timeout(12000) });
-        if (!cancelled) setApiStatus(response.ok ? "online" : "issue");
+        const response = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(12000), cache: "no-store" });
+        if (!cancelled) { setApiStatus(response.ok ? "online" : "issue"); setHealthCheckedAt(new Date()); }
       } catch {
-        if (!cancelled) setApiStatus("issue");
+        if (!cancelled) { setApiStatus("issue"); setHealthCheckedAt(new Date()); }
       }
     };
-    check();
+    run();
     return () => { cancelled = true; };
   }, []);
 
-  const selectTool = (id) => {
+  const chooseTool = (id) => {
     setActiveTool(id);
+    setView("workspace");
     setPrompt("");
     setResult(null);
     setError("");
@@ -68,7 +101,8 @@ function App() {
 
   const runTool = async (event) => {
     event.preventDefault();
-    if (!prompt.trim() || busy) return;
+    const description = prompt.trim();
+    if (!description || busy) return;
     setBusy(true);
     setError("");
     setResult(null);
@@ -77,28 +111,37 @@ function App() {
       const response = await fetch(`${API_BASE}/${activeTool}`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify({ description: prompt.trim() }),
+        body: JSON.stringify({ description }),
         signal: AbortSignal.timeout(90000)
       });
       const raw = await response.text();
       let data;
-      try { data = raw ? JSON.parse(raw) : {}; } catch { data = { detail: raw || "The server returned an unreadable response." }; }
+      try { data = raw ? JSON.parse(raw) : {}; }
+      catch { data = { detail: raw || "The server returned an unreadable response." }; }
       if (!response.ok) {
         const detail = typeof data?.detail === "string" ? data.detail : "";
-        if (response.status === 503) {
-          throw new Error(detail || "The AI provider is temporarily unavailable or overloaded. Please wait a few minutes and try again.");
-        }
-        if (response.status === 429) {
-          throw new Error(detail || "The AI service rate limit has been reached. Please wait before trying again.");
-        }
-        throw new Error(detail || `Request failed (${response.status}). Please try again.`);
+        if (response.status === 503) throw new Error(detail || "The AI provider is temporarily unavailable or overloaded. Your request was not completed. Please wait a few minutes and retry.");
+        if (response.status === 429) throw new Error(detail || "The AI usage limit has been reached. Please wait before trying again.");
+        if (response.status === 401 || response.status === 403) throw new Error(detail || "The AI service rejected this request. Please check the server configuration.");
+        throw new Error(detail || `Request failed (HTTP ${response.status}). Please try again.`);
       }
-      setResult({ data, text: extractOutput(data, activeTool), createdAt: new Date() });
+      const text = extractOutput(data, activeTool);
+      const item = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        toolId: activeTool,
+        toolLabel: currentTool.short,
+        prompt: description,
+        text,
+        createdAt: new Date().toISOString(),
+        model: typeof data?.model_used === "string" ? data.model_used : ""
+      };
+      setResult({ data, text });
+      setHistory(previous => [item, ...previous].slice(0, 12));
     } catch (err) {
       if (err.name === "TimeoutError" || err.name === "AbortError") {
-        setError("The request took too long. The free server may be waking up. Please wait a little and try again.");
+        setError("This request timed out. The free hosting service may be waking up, or the AI provider may be slow. Please retry in a moment.");
       } else if (err instanceof TypeError) {
-        setError("We could not connect to the AI service. Check your internet connection and backend CORS settings, then try again.");
+        setError("We could not reach the backend. Check your connection, then use the status control above to test the service again.");
       } else {
         setError(err.message || "Something went wrong. Please try again.");
       }
@@ -107,54 +150,71 @@ function App() {
     }
   };
 
-  const copyResult = async () => {
-    if (!result?.text) return;
+  const copyText = async (text) => {
     try {
-      await navigator.clipboard.writeText(result.text);
+      await navigator.clipboard.writeText(text);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1800);
     } catch {
-      setError("Clipboard access is unavailable in this browser. Select the result text and copy it manually.");
+      setError("Clipboard access is unavailable. Select the text and copy it manually.");
     }
+  };
+
+  const openHistoryItem = (item) => {
+    setActiveTool(item.toolId);
+    setPrompt(item.prompt);
+    setResult({ data: { model_used: item.model }, text: item.text });
+    setError("");
+    setView("workspace");
+    setMobileNav(false);
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
   };
 
   return (
     <div className={dark ? "app dark" : "app"}>
       <aside className={`sidebar ${mobileNav ? "mobile-open" : ""}`}>
-        <div className="brand">
-          <div className="brand-mark"><Sparkles size={19} strokeWidth={2.4} /></div>
-          <div className="brand-name">OnlineEarning<span>Hub</span><small>AI WORKSPACE</small></div>
-          <button className="icon-btn close-mobile" onClick={() => setMobileNav(false)} aria-label="Close menu"><X size={18}/></button>
-        </div>
+        <button className="brand" onClick={() => { setView("workspace"); setMobileNav(false); }} aria-label="OnlineEarningHub AI home">
+          <span className="brand-mark"><Sparkles size={19}/></span>
+          <span className="brand-name">OnlineEarning<span>Hub</span><small>INTELLIGENCE WORKSPACE</small></span>
+          <span className="brand-version">AI</span>
+        </button>
 
-        <div className="workspace-label">WORKSPACE</div>
+        <div className="nav-caption">YOUR WORKSPACE</div>
+        <nav className="nav-list" aria-label="Workspace navigation">
+          <button className={`nav-item ${view === "workspace" ? "active" : ""}`} onClick={() => { setView("workspace"); setMobileNav(false); }}>
+            <span className="nav-icon neutral"><Command size={17}/></span><span>Workspace</span><ChevronRight className="nav-chevron" size={15}/>
+          </button>
+          <button className={`nav-item ${view === "history" ? "active" : ""}`} onClick={() => { setView("history"); setMobileNav(false); }}>
+            <span className="nav-icon neutral"><History size={17}/></span><span>Recent activity</span><span className="nav-count">{history.length}</span>
+          </button>
+        </nav>
+
+        <div className="nav-caption tools-caption">AI CAPABILITIES</div>
         <nav className="nav-list" aria-label="AI tools">
           {tools.map((tool) => {
             const Icon = tool.icon;
-            return <button key={tool.id} className={`nav-item ${activeTool === tool.id ? "active" : ""}`} onClick={() => selectTool(tool.id)}>
-              <span className={`nav-icon ${tool.tint}`}><Icon size={17}/></span>
-              <span>{tool.label}</span>
-              {activeTool === tool.id && <span className="active-dot"/>}
+            return <button key={tool.id} className={`nav-item ${view === "workspace" && activeTool === tool.id ? "active" : ""}`} onClick={() => chooseTool(tool.id)}>
+              <span className={`nav-icon ${tool.tint}`}><Icon size={17}/></span><span>{tool.short}</span>
+              {view === "workspace" && activeTool === tool.id && <span className="active-dot"/>}
             </button>;
           })}
         </nav>
 
-        <div className="sidebar-divider"/>
-        <div className="workspace-label">YOUR WORKSPACE</div>
-        <div className="nav-item muted-nav"><Clock3 size={17}/><span>Recent activity</span><span className="soon">Soon</span></div>
-        <div className="nav-item muted-nav"><ShieldCheck size={17}/><span>Account & security</span><span className="soon">Soon</span></div>
-
         <div className="sidebar-bottom">
-          <div className="upgrade-card">
-            <div className="upgrade-icon"><Zap size={17}/></div>
-            <strong>Built for your next big idea.</strong>
-            <p>Your AI workspace for planning, writing and better work.</p>
-            <span className="preview-tag">EARLY ACCESS</span>
+          <div className="sidebar-promo">
+            <div className="promo-orb"><WandSparkles size={18}/></div>
+            <span className="promo-label">BUILT TO MOVE YOU FORWARD</span>
+            <strong>Make good ideas happen.</strong>
+            <p>One calm, focused space for your next step.</p>
+            <div className="promo-foot"><span><Zap size={13}/> Four AI tools</span><span>Free access</span></div>
           </div>
-          <div className="profile-row">
-            <div className="avatar">OH</div>
-            <div className="profile-copy"><strong>Guest workspace</strong><small>No account required</small></div>
-            <MoreHorizontal size={18} className="profile-more"/>
+          <div className="sidebar-profile">
+            <div className="profile-avatar">OH</div>
+            <div className="profile-text"><strong>Personal workspace</strong><small>Private on this device</small></div>
+            <ShieldCheck size={17} className="profile-shield"/>
           </div>
         </div>
       </aside>
@@ -165,86 +225,89 @@ function App() {
         <header className="topbar">
           <div className="topbar-left">
             <button className="icon-btn mobile-menu" onClick={() => setMobileNav(true)} aria-label="Open menu"><Menu size={20}/></button>
-            <div className="breadcrumb">Workspace <span>/</span> <strong>{currentTool.label}</strong></div>
+            <div className="breadcrumb"><span>OnlineEarningHub</span><b>/</b><strong>{view === "history" ? "Recent activity" : currentTool.short}</strong></div>
           </div>
           <div className="topbar-right">
-            <div className={`service-status ${apiStatus}`}><span className="status-dot"/>{apiStatus === "checking" ? "Checking backend" : apiStatus === "online" ? "Backend online · AI not tested" : "Backend unavailable"}</div>
-            <button className="icon-btn theme-btn" onClick={() => setDark(!dark)} aria-label="Toggle theme">{dark ? <Sun size={18}/> : <Moon size={18}/>}</button>
-            <button className="help-btn" onClick={() => setShowDetails(!showDetails)}><CircleHelp size={17}/> Help</button>
+            <button className={`service-status ${apiStatus}`} onClick={checkHealth} title="Check backend availability">
+              <span className="status-dot"/><span>{apiStatus === "checking" ? "Checking backend" : apiStatus === "online" ? "Backend online" : "Backend unavailable"}</span><RefreshCw size={13} className={apiStatus === "checking" ? "spin" : ""}/>
+            </button>
+            <span className="topbar-divider"/>
+            <button className="icon-btn theme-btn" onClick={() => setDark(value => !value)} aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}>{dark ? <Sun size={18}/> : <Moon size={18}/>}</button>
+            <a className="topbar-link" href="https://onlineearninghub-ai.onrender.com/docs" target="_blank" rel="noreferrer">API docs <ExternalLink size={13}/></a>
           </div>
         </header>
 
         <div className="content">
-          <section className="welcome-row">
-            <div>
-              <div className="eyebrow"><span className="eyebrow-line"/> YOUR INTELLIGENT WORKSPACE</div>
-              <h1>Make your next move<br/><span>your best move.</span></h1>
-              <p className="welcome-copy">One focused workspace to think clearly, create confidently, and move work forward.</p>
-            </div>
-            <div className="welcome-art" aria-hidden="true">
-              <div className="art-orbit orbit-one"/><div className="art-orbit orbit-two"/>
-              <div className="art-core"><WandSparkles size={31}/></div>
-              <div className="art-chip chip-a"><PenLine size={15}/></div>
-              <div className="art-chip chip-b"><Microscope size={15}/></div>
-              <div className="art-chip chip-c"><Layers3 size={15}/></div>
-            </div>
-          </section>
+          {view === "workspace" ? (
+            <>
+              <section className="hero">
+                <div className="hero-copy">
+                  <div className="eyebrow"><span className="eyebrow-mark"/> YOUR IDEAS, WITH MOMENTUM</div>
+                  <h1>Think bigger.<br/><span>Move smarter.</span></h1>
+                  <p className="hero-description">A focused AI workspace to turn questions into clarity, ideas into action, and good work into great work.</p>
+                  <div className="hero-proof"><span><CheckCircle2 size={15}/> Four focused tools</span><i/><span><Globe2 size={15}/> Made for everyone</span></div>
+                </div>
+                <div className="hero-visual" aria-hidden="true">
+                  <div className="visual-glow"/><div className="visual-ring ring-a"/><div className="visual-ring ring-b"/>
+                  <div className="visual-center"><Sparkles size={32}/></div>
+                  <div className="visual-float float-one"><PenLine size={17}/></div>
+                  <div className="visual-float float-two"><Microscope size={17}/></div>
+                  <div className="visual-float float-three"><Layers3 size={17}/></div>
+                  <span className="visual-star star-one">✳</span><span className="visual-star star-two">✦</span>
+                </div>
+              </section>
 
-          {showDetails && <div className="help-panel"><strong>How to use OnlineEarningHub AI</strong><p>Choose a tool, describe what you need, and select Generate. Your request is sent securely to your configured backend service. Do not submit passwords, payment details, or other sensitive personal information.</p><button onClick={() => setShowDetails(false)}>Got it</button></div>}
+              <div className="section-heading"><div><span className="section-kicker">YOUR AI TOOLKIT</span><h2>What are we working on?</h2></div><span className="section-note">Choose a starting point</span></div>
+              <section className="tool-grid" aria-label="Choose an AI tool">
+                {tools.map((tool, index) => {
+                  const Icon = tool.icon;
+                  return <button key={tool.id} className={`tool-card ${activeTool === tool.id ? "selected" : ""}`} onClick={() => chooseTool(tool.id)}>
+                    <div className="tool-card-top"><span className={`tool-icon ${tool.tint}`}><Icon size={20}/></span><span className="tool-index">0{index + 1}</span></div>
+                    <strong>{tool.label}</strong><p>{tool.subtitle}</p><span className="tool-open">Open tool <ArrowUpRight size={14}/></span>
+                  </button>;
+                })}
+              </section>
 
-          <section className="tool-grid" aria-label="Choose an AI tool">
-            {tools.map((tool) => {
-              const Icon = tool.icon;
-              return <button key={tool.id} className={`tool-card ${activeTool === tool.id ? "selected" : ""}`} onClick={() => selectTool(tool.id)}>
-                <div className={`tool-icon ${tool.tint}`}><Icon size={19}/></div>
-                <div className="tool-card-copy"><strong>{tool.label}</strong><span>{tool.subtitle}</span></div>
-                <ArrowUpRight size={16} className="tool-arrow"/>
-              </button>;
-            })}
-          </section>
+              <section className="workspace-panel">
+                <div className="panel-heading">
+                  <div className={`panel-tool-icon ${currentTool.tint}`}><currentTool.icon size={20}/></div>
+                  <div className="panel-heading-copy"><span className="panel-kicker">{currentTool.eyebrow}</span><h2>{currentTool.label}</h2><p>{currentTool.subtitle}</p></div>
+                  <div className="powered-label"><Sparkles size={13}/> AI ASSISTED</div>
+                </div>
+                <form onSubmit={runTool}>
+                  <label className="prompt-label" htmlFor="prompt">Tell us what you have in mind</label>
+                  <div className="prompt-wrap">
+                    <textarea id="prompt" value={prompt} onChange={event => setPrompt(event.target.value)} placeholder={currentTool.placeholder} rows={5} maxLength={12000} required />
+                    <div className="prompt-footer"><span>{prompt.length.toLocaleString()} / 12,000</span><button type="button" className="sample-btn" onClick={() => { setPrompt(currentTool.sample); setError(""); }}>Use a sample prompt <ArrowUpRight size={13}/></button></div>
+                  </div>
+                  <div className="form-bottom"><div className="privacy-note"><ShieldCheck size={15}/><span>Your API key stays on the server. Avoid sharing sensitive information.</span></div>
+                    <button className="generate-btn" type="submit" disabled={busy || !prompt.trim()}>{busy ? <><LoaderCircle size={17} className="spin"/> Working...</> : <><Sparkles size={16}/> Generate response <ArrowRight size={16}/></>}</button>
+                  </div>
+                </form>
 
-          <section className="workspace-panel">
-            <div className="panel-heading">
-              <div className={`panel-tool-icon ${currentTool.tint}`}><currentTool.icon size={19}/></div>
-              <div><div className="panel-title">{currentTool.label} with AI</div><div className="panel-subtitle">{currentTool.subtitle}</div></div>
-              <div className="powered-label"><Sparkles size={13}/> AI POWERED</div>
-            </div>
-            <form onSubmit={runTool}>
-              <label className="prompt-label" htmlFor="prompt">What would you like to {activeTool === "check" ? "review" : activeTool === "plan" ? "plan" : activeTool === "write" ? "create" : "research"}?</label>
-              <div className="prompt-wrap">
-                <textarea id="prompt" value={prompt} onChange={e => setPrompt(e.target.value)} placeholder={currentTool.placeholder} rows={5} maxLength={12000} required />
-                <div className="prompt-footer"><span>{prompt.length.toLocaleString()} / 12,000 characters</span><button type="button" className="sample-btn" onClick={() => setPrompt(currentTool.sample)}>Try an example <ArrowUpRight size={13}/></button></div>
-              </div>
-              <div className="form-bottom">
-                <div className="privacy-note"><ShieldCheck size={15}/> Your request is processed by the connected AI service.</div>
-                <button className="generate-btn" type="submit" disabled={busy || !prompt.trim()}>
-                  {busy ? <><LoaderCircle size={17} className="spin"/> Generating...</> : <><Sparkles size={16}/> Generate <ArrowRight size={16}/></>}
-                </button>
-              </div>
-            </form>
+                {busy && <div className="loading-state"><div className="loading-mark"><Sparkles size={21}/></div><strong>Creating something useful</strong><span>Your request is being processed. The first response may take longer on free hosting.</span><div className="loading-track"><i/></div></div>}
+                {error && <div className="error-box" role="alert"><span className="error-icon">!</span><div><strong>We couldn't complete your request</strong><p>{error}</p><button type="button" onClick={() => { setError(""); }}>Dismiss</button></div></div>}
+                {result && !busy && <div className="result-section">
+                  <div className="result-heading"><div><div className="result-kicker"><CheckCircle2 size={14}/> RESPONSE READY</div><h3>Your result</h3></div><button type="button" className="copy-btn" onClick={() => copyText(result.text)}>{copied ? <Check size={15}/> : <Copy size={15}/>} {copied ? "Copied" : "Copy response"}</button></div>
+                  <div className="result-meta"><span><Sparkles size={13}/> {result.data.agent || currentTool.short}</span>{result.data.model_used && <span>Model: {result.data.model_used}</span>}{typeof result.data.fallback_used === "boolean" && <span className={result.data.fallback_used ? "fallback-note" : "primary-note"}>{result.data.fallback_used ? "Fallback model" : "Primary model"}</span>}</div>
+                  <article className="result-content">{result.text}</article>
+                  {activeTool === "research" && Array.isArray(result.data.sources) && result.data.sources.length === 0 && <div className="research-note"><Globe2 size={15}/> This response is AI-generated and does not contain verified live web sources.</div>}
+                  <div className="result-actions"><button type="button" className="secondary-btn" onClick={() => { setResult(null); setPrompt(""); }}> <Plus size={14}/> New request</button><span>Check important facts before acting on AI-generated content.</span></div>
+                </div>}
+              </section>
 
-            {busy && <div className="loading-state"><div className="loading-mark"><Sparkles size={21}/></div><strong>Working on your request</strong><span>This can take a little longer while the AI service starts up.</span><div className="loading-track"><i/></div></div>}
-            {error && <div className="error-box"><div className="error-icon">!</div><div><strong>We couldn't complete that request</strong><p>{error}</p><button onClick={() => setError("")}>Dismiss</button></div></div>}
-            {result && !busy && <div className="result-section">
-              <div className="result-heading"><div><div className="result-kicker"><CheckCircle2 size={14}/> RESPONSE READY</div><h3>Your result</h3></div><button className="copy-btn" onClick={copyResult}>{copied ? <Check size={15}/> : <Clipboard size={15}/>} {copied ? "Copied" : "Copy result"}</button></div>
-              <div className="result-meta">
-                <span><Sparkles size={13}/> {result.data.agent || currentTool.label}</span>
-                {result.data.model_used && <span>Model: {result.data.model_used}</span>}
-                {typeof result.data.fallback_used === "boolean" && <span className={result.data.fallback_used ? "fallback-note" : "primary-note"}>{result.data.fallback_used ? "Fallback model used" : "Primary model used"}</span>}
-              </div>
-              <article className="result-content">{result.text}</article>
-              {activeTool === "research" && Array.isArray(result.data.sources) && result.data.sources.length === 0 && <div className="research-note"><Globe2 size={15}/> This response uses AI knowledge and does not include verified live web sources.</div>}
-              <div className="result-actions"><button className="secondary-btn" onClick={() => {setResult(null); setPrompt("");}}>Start a new request</button><span>Review AI-generated content before relying on it.</span></div>
-            </div>}
-          </section>
+              <div className="bottom-note"><div className="bottom-note-icon"><ShieldCheck size={17}/></div><div><strong>Designed for focused, responsible work</strong><span>Review generated content and verify important information before making decisions.</span></div><button type="button" onClick={() => setView("history")}>View activity <ArrowRight size={14}/></button></div>
+            </>
+          ) : (
+            <section className="history-page">
+              <div className="eyebrow"><span className="eyebrow-mark"/> YOUR WORK, IN ONE PLACE</div>
+              <div className="history-title-row"><div><h1>Recent <span>activity.</span></h1><p className="hero-description">Your latest AI responses, saved privately in this browser.</p></div>{history.length > 0 && <button className="clear-history" onClick={clearHistory}><Trash2 size={15}/> Clear history</button>}</div>
+              {history.length === 0 ? <div className="empty-history"><div className="empty-icon"><History size={25}/></div><h2>A fresh start.</h2><p>Your completed AI requests will appear here. Your activity is stored only in this browser.</p><button className="generate-btn" onClick={() => setView("workspace")}>Go to workspace <ArrowRight size={15}/></button></div> :
+                <div className="history-list">{history.map(item => <article className="history-item" key={item.id}><div className={`history-icon ${tools.find(tool => tool.id === item.toolId)?.tint || "violet"}`}>{(() => { const Icon = tools.find(tool => tool.id === item.toolId)?.icon || Sparkles; return <Icon size={18}/>; })()}</div><div className="history-copy"><div className="history-meta"><strong>{item.toolLabel}</strong><span>{new Date(item.createdAt).toLocaleString()}</span></div><p>{item.prompt}</p><span className="history-preview">{item.text.slice(0, 170)}{item.text.length > 170 ? "…" : ""}</span></div><button className="history-open" onClick={() => openHistoryItem(item)} aria-label="Open saved response"><ArrowUpRight size={17}/></button></article>)}</div>}
+            </section>
+          )}
 
-          <section className="trust-row">
-            <div><ShieldCheck size={17}/><span><strong>Privacy-conscious</strong><small>No API keys in your browser</small></span></div>
-            <div><Zap size={17}/><span><strong>One connected workspace</strong><small>Four focused AI tools</small></span></div>
-            <div><Globe2 size={17}/><span><strong>Made for a global audience</strong><small>Use from anywhere</small></span></div>
-          </section>
-
-          <footer className="footer"><div>© {new Date().getFullYear()} OnlineEarningHub AI. All rights reserved.</div><div><span>Independent AI workspace</span><span className="footer-dot">·</span><span>Version 1.0 frontend preview</span></div></footer>
+          <footer className="footer"><span>© {new Date().getFullYear()} OnlineEarningHub AI</span><span><i/> Independent AI workspace <b>·</b> Built for a global audience</span></footer>
         </div>
       </main>
     </div>
