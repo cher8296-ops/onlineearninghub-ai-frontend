@@ -311,7 +311,7 @@ function App() {
             </section>
           )}
 
-          <footer className="footer"><span>© {new Date().getFullYear()} OnlineEarningHub AI</span><span><i/> Independent AI workspace <b>·</b> Built for a global audience</span></footer>
+          <footer className="footer"><span>© {new Date().getFullYear()} OnlineEarningHub AI</span><span className="footer-links"><a href="/about.html">About</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="https://onlineearninghub-ai.onrender.com/docs" target="_blank" rel="noreferrer">API docs</a></span><span><i/> Independent AI workspace <b>·</b> AI output may be inaccurate; verify important information.</span></footer>
         </div>
       </main>
     </div>

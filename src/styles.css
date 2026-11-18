@@ -16,3 +16,9 @@
 .research-sources{display:flex;flex-direction:column;gap:8px;margin-top:12px;padding:14px 16px;border:1px solid var(--line,#e5e7eb);border-radius:12px;background:var(--surface,#fff);font-size:13px}
 .research-sources strong{font-size:12px;letter-spacing:.04em;text-transform:uppercase}
 .research-sources a{color:var(--accent,#5b5bd6);overflow-wrap:anywhere;text-decoration:underline;text-underline-offset:3px}
+
+.footer-links{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.footer-links a{color:#7866dc;text-decoration:none;font-weight:600}
+.footer-links a:hover{text-decoration:underline;text-underline-offset:3px}
+.dark .footer-links a{color:#b2a5ff}
+@media(max-width:520px){.footer-links{gap:14px}}
