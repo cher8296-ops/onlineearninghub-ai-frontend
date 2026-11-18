@@ -40,7 +40,7 @@ function extractOutput(data, toolId) {
 
 function App() {
   const [activeTool, setActiveTool] = useState("plan");
-  const [view, setView] = useState("workspace");
+  const [view, setView] = useState(() => new URLSearchParams(window.location.search).has("verify") ? "account" : "workspace");
   const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -76,6 +76,14 @@ function App() {
       setHealthCheckedAt(new Date());
     }
   };
+
+  useEffect(() => {
+    fetch(`${API_BASE}/analytics/event`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ event: "page_view", path: window.location.pathname })
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
