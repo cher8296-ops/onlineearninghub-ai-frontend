@@ -38,13 +38,18 @@ export default function Account({ onClose }) {
     if(!currentToken)return;
     try{
       const headers={Authorization:"Bearer "+currentToken};
+      const readJson=async response=>{
+        const data=await response.json().catch(()=>({detail:"Invalid server response"}));
+        if(!response.ok){const err=new Error(data.detail||"HTTP "+response.status);err.status=response.status;throw err;}
+        return data;
+      };
       const [me,dash]=await Promise.all([
-        fetch(API+"/me",{headers}).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.detail);return d;}),
-        fetch(API+"/me/dashboard",{headers}).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.detail);return d;})
+        fetch(API+"/me",{headers}).then(readJson),
+        fetch(API+"/me/dashboard",{headers}).then(readJson)
       ]);
       setUser(me);setDashboard(dash);
       try{const a=await fetch(API+"/admin/analytics",{headers});if(a.ok){setAdmin(await a.json());const u=await fetch(API+"/admin/users",{headers});if(u.ok){const data=await u.json();setAdminUsers(data.users||[]);}}else{setAdmin(null);setAdminUsers([]);}}catch{setAdmin(null);setAdminUsers([]);}
-    }catch(e){setError(e.message);setToken("");sessionStorage.removeItem(TOKEN_KEY);}
+    }catch(e){setError(e.message);if(e.status===401){setToken("");sessionStorage.removeItem(TOKEN_KEY);setUser(null);setDashboard(null);}}
   };
   useEffect(()=>{
     if(token)refresh(token);
