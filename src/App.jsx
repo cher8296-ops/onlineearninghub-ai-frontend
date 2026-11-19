@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import Account from "./Account.jsx";
 import {
   ArrowRight, ArrowUpRight, Check, CheckCircle2, ChevronRight, Clipboard,
   Clock3, Command, FileCheck2, Globe2, History, Layers3, LoaderCircle,
@@ -37,9 +38,24 @@ function extractOutput(data, toolId) {
   return JSON.stringify(data, null, 2);
 }
 
+
+const mainCopy = {
+  en: { workspace:"Workspace", activity:"Recent activity", account:"Account & plans", yourIdeas:"YOUR IDEAS, WITH MOMENTUM", think:"Think bigger.", move:"Move smarter.", hero:"A focused AI workspace to turn questions into clarity, ideas into action, and good work into great work.", toolkit:"YOUR AI TOOLKIT", question:"What are we working on?", choose:"Choose a starting point", tools:["Strategic planner","Content studio","Research desk","Quality review"], open:"Open tool", prompt:"Tell us what you have in mind", sample:"Use a sample prompt", generate:"Generate response", working:"Working...", recent:"Your latest AI responses, saved privately in this browser.", empty:"A fresh start.", noActivity:"Your completed AI requests will appear here.", view:"View activity", made:"Made for everyone" },
+  om: { workspace:"Iddoo hojii", activity:"Hojii dhiheenyaa", account:"Herrega fi karoora", yourIdeas:"YAADA KEE GARA HOJII", think:"Bal'inaan yaadi.", move:"Of eeggannoodhaan tarkaanfadhu.", hero:"Iddoo AI gaaffii gara hubannoo, yaada gara hojii fi hojii gaarii gara bu'aa gaariitti jijjiiru.", toolkit:"MEESHAALEE AI KEE", question:"Maal irratti hojjenna?", choose:"Meeshaa filadhu", tools:["Karoora qopheessi","Qabiyyee barreessi","Qorannoo","Qulqullina mirkaneessi"], open:"Bani", prompt:"Waan barbaaddu nutti himi", sample:"Fakkeenya fayyadami", generate:"Deebii uumi", working:"Hojjetamaa jira...", recent:"Deebiiwwan AI dhiheenya kana browser kana keessatti kuufaman.", empty:"Jalqaba haaraa.", noActivity:"Gaaffiiwwan AI xumuraman asitti mul'atu.", view:"Hojii ilaali", made:"Nama hundaaf qophaa'e" },
+  am: { workspace:"የስራ ቦታ", activity:"የቅርብ ጊዜ እንቅስቃሴ", account:"መለያ እና እቅዶች", yourIdeas:"ሀሳብዎን ወደ ተግባር", think:"በሰፊው ያስቡ።", move:"በብልህነት ይንቀሳቀሱ።", hero:"ጥያቄዎችን ወደ ግልጽነት፣ ሀሳቦችን ወደ ተግባር የሚቀይር የAI የስራ ቦታ።", toolkit:"የእርስዎ AI መሳሪያዎች", question:"በምን ላይ እንስራ?", choose:"መጀመሪያ ይምረጡ", tools:["ስትራቴጂ እቅድ","የይዘት ስቱዲዮ","ምርምር","ጥራት ግምገማ"], open:"ክፈት", prompt:"ምን እንደሚፈልጉ ይንገሩን", sample:"ምሳሌ ይጠቀሙ", generate:"መልስ ፍጠር", working:"በመስራት ላይ...", recent:"የቅርብ ጊዜ የAI ምላሾችዎ በዚህ አሳሽ ውስጥ ተቀምጠዋል።", empty:"አዲስ ጅማሬ።", noActivity:"የተጠናቀቁ የAI ጥያቄዎችዎ እዚህ ይታያሉ።", view:"እንቅስቃሴ ይመልከቱ", made:"ለሁሉም የተዘጋጀ" }
+};
+
 function App() {
   const [activeTool, setActiveTool] = useState("plan");
-  const [view, setView] = useState("workspace");
+  const [view, setView] = useState(() => new URLSearchParams(window.location.search).has("verify") ? "account" : "workspace");
+  const [language,setLanguage] = useState(() => localStorage.getItem("oeh-language") || "en");
+  const tr = mainCopy[language] || mainCopy.en;
+  useEffect(() => {
+    const syncLanguage = () => setLanguage(localStorage.getItem("oeh-language") || "en");
+    window.addEventListener("oeh-language-change",syncLanguage);
+    return () => window.removeEventListener("oeh-language-change",syncLanguage);
+  }, []);
+
   const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -77,6 +93,14 @@ function App() {
   };
 
   useEffect(() => {
+    fetch(`${API_BASE}/analytics/event`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ event: "page_view", path: window.location.pathname })
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
     const run = async () => {
       try {
@@ -112,7 +136,7 @@ function App() {
     try {
       const response = await fetch(`${API_BASE}/${activeTool}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        headers: { "Content-Type": "application/json", "Accept": "application/json", ...(sessionStorage.getItem("oeh-session-token") ? { Authorization: "Bearer " + sessionStorage.getItem("oeh-session-token") } : {}) },
         body: JSON.stringify({ description }),
         signal: AbortSignal.timeout(120000)
       });
@@ -122,6 +146,10 @@ function App() {
       catch { data = { detail: raw || "The server returned an unreadable response." }; }
       if (!response.ok) {
         const detail = typeof data?.detail === "string" ? data.detail : "";
+        if (response.status === 401 && detail.toLowerCase().includes("sign in")) {
+          setView("account");
+          throw new Error("Please create an account or sign in to use the AI workspace and save your history.");
+        }
         if (response.status === 503) throw new Error(detail || "The AI provider is temporarily unavailable or overloaded. Your request was not completed. Please wait a few minutes and retry.");
         if (response.status === 429) throw new Error(detail || "The AI usage limit has been reached. Please wait before trying again.");
         if (response.status === 401 || response.status === 403) throw new Error(detail || "The AI service rejected this request. Please check the server configuration.");
@@ -187,10 +215,13 @@ function App() {
         <div className="nav-caption">YOUR WORKSPACE</div>
         <nav className="nav-list" aria-label="Workspace navigation">
           <button className={`nav-item ${view === "workspace" ? "active" : ""}`} onClick={() => { setView("workspace"); setMobileNav(false); }}>
-            <span className="nav-icon neutral"><Command size={17}/></span><span>Workspace</span><ChevronRight className="nav-chevron" size={15}/>
+            <span className="nav-icon neutral"><Command size={17}/></span><span>{tr.workspace}</span><ChevronRight className="nav-chevron" size={15}/>
           </button>
           <button className={`nav-item ${view === "history" ? "active" : ""}`} onClick={() => { setView("history"); setMobileNav(false); }}>
-            <span className="nav-icon neutral"><History size={17}/></span><span>Recent activity</span><span className="nav-count">{history.length}</span>
+            <span className="nav-icon neutral"><History size={17}/></span><span>{tr.activity}</span><span className="nav-count">{history.length}</span>
+          </button>
+          <button className={`nav-item ${view === "account" ? "active" : ""}`} onClick={() => { setView("account"); setMobileNav(false); }}>
+            <span className="nav-icon neutral"><ShieldCheck size={17}/></span><span>{tr.account}</span>
           </button>
         </nav>
 
@@ -227,9 +258,9 @@ function App() {
         <header className="topbar">
           <div className="topbar-left">
             <button className="icon-btn mobile-menu" onClick={() => setMobileNav(true)} aria-label="Open menu"><Menu size={20}/></button>
-            <div className="breadcrumb"><span>OnlineEarningHub</span><b>/</b><strong>{view === "history" ? "Recent activity" : currentTool.short}</strong></div>
+            <div className="breadcrumb"><span>OnlineEarningHub</span><b>/</b><strong>{view === "history" ? tr.activity : view === "account" ? tr.account : currentTool.short}</strong></div>
           </div>
-          <div className="topbar-right">
+          <div className="topbar-right"><label className="main-language" aria-label="Language"><Globe2 size={13}/><select value={language} onChange={event=>{setLanguage(event.target.value);localStorage.setItem("oeh-language",event.target.value);window.dispatchEvent(new Event("oeh-language-change"));}}><option value="en">EN</option><option value="om">OM</option><option value="am">አማ</option></select></label>
             <button className={`service-status ${apiStatus}`} onClick={checkHealth} title="Check backend availability">
               <span className="status-dot"/><span>{apiStatus === "checking" ? "Checking backend" : apiStatus === "online" ? "Backend online" : apiStatus === "not_configured" ? "AI not configured" : "Service unavailable"}</span><RefreshCw size={13} className={apiStatus === "checking" ? "spin" : ""}/>
             </button>
@@ -240,14 +271,14 @@ function App() {
         </header>
 
         <div className="content">
-          {view === "workspace" ? (
+          {view === "account" ? <Account onClose={() => setView("workspace")} /> : view === "workspace" ? (
             <>
               <section className="hero">
                 <div className="hero-copy">
-                  <div className="eyebrow"><span className="eyebrow-mark"/> YOUR IDEAS, WITH MOMENTUM</div>
-                  <h1>Think bigger.<br/><span>Move smarter.</span></h1>
-                  <p className="hero-description">A focused AI workspace to turn questions into clarity, ideas into action, and good work into great work.</p>
-                  <div className="hero-proof"><span><CheckCircle2 size={15}/> Four focused tools</span><i/><span><Globe2 size={15}/> Made for everyone</span></div>
+                  <div className="eyebrow"><span className="eyebrow-mark"/> {tr.yourIdeas}</div>
+                  <h1>{tr.think}<br/><span>{tr.move}</span></h1>
+                  <p className="hero-description">{tr.hero}</p>
+                  <div className="hero-proof"><span><CheckCircle2 size={15}/> Four focused tools</span><i/><span><Globe2 size={15}/> {tr.made}</span></div>
                 </div>
                 <div className="hero-visual" aria-hidden="true">
                   <div className="visual-glow"/><div className="visual-ring ring-a"/><div className="visual-ring ring-b"/>
@@ -259,13 +290,13 @@ function App() {
                 </div>
               </section>
 
-              <div className="section-heading"><div><span className="section-kicker">YOUR AI TOOLKIT</span><h2>What are we working on?</h2></div><span className="section-note">Choose a starting point</span></div>
+              <div className="section-heading"><div><span className="section-kicker">{tr.toolkit}</span><h2>{tr.question}</h2></div><span className="section-note">{tr.choose}</span></div>
               <section className="tool-grid" aria-label="Choose an AI tool">
                 {tools.map((tool, index) => {
                   const Icon = tool.icon;
                   return <button key={tool.id} className={`tool-card ${activeTool === tool.id ? "selected" : ""}`} onClick={() => chooseTool(tool.id)}>
                     <div className="tool-card-top"><span className={`tool-icon ${tool.tint}`}><Icon size={20}/></span><span className="tool-index">0{index + 1}</span></div>
-                    <strong>{tool.label}</strong><p>{tool.subtitle}</p><span className="tool-open">Open tool <ArrowUpRight size={14}/></span>
+                    <strong>{tr.tools[index]}</strong><p>{tool.subtitle}</p><span className="tool-open">{tr.open} <ArrowUpRight size={14}/></span>
                   </button>;
                 })}
               </section>
@@ -277,13 +308,13 @@ function App() {
                   <div className="powered-label"><Sparkles size={13}/> AI ASSISTED</div>
                 </div>
                 <form onSubmit={runTool}>
-                  <label className="prompt-label" htmlFor="prompt">Tell us what you have in mind</label>
+                  <label className="prompt-label" htmlFor="prompt">{tr.prompt}</label>
                   <div className="prompt-wrap">
                     <textarea id="prompt" value={prompt} onChange={event => setPrompt(event.target.value)} placeholder={currentTool.placeholder} rows={5} maxLength={10000} required />
-                    <div className="prompt-footer"><span>{prompt.length.toLocaleString()} / 10,000</span><button type="button" className="sample-btn" onClick={() => { setPrompt(currentTool.sample); setError(""); }}>Use a sample prompt <ArrowUpRight size={13}/></button></div>
+                    <div className="prompt-footer"><span>{prompt.length.toLocaleString()} / 10,000</span><button type="button" className="sample-btn" onClick={() => { setPrompt(currentTool.sample); setError(""); }}>{tr.sample} <ArrowUpRight size={13}/></button></div>
                   </div>
                   <div className="form-bottom"><div className="privacy-note"><ShieldCheck size={15}/><span>Your API key stays on the server. Avoid sharing sensitive information.</span></div>
-                    <button className="generate-btn" type="submit" disabled={busy || !prompt.trim()}>{busy ? <><LoaderCircle size={17} className="spin"/> Working...</> : <><Sparkles size={16}/> Generate response <ArrowRight size={16}/></>}</button>
+                    <button className="generate-btn" type="submit" disabled={busy || !prompt.trim()}>{busy ? <><LoaderCircle size={17} className="spin"/> {tr.working}</> : <><Sparkles size={16}/> {tr.generate} <ArrowRight size={16}/></>}</button>
                   </div>
                 </form>
 
@@ -300,13 +331,13 @@ function App() {
                 </div>}
               </section>
 
-              <div className="bottom-note"><div className="bottom-note-icon"><ShieldCheck size={17}/></div><div><strong>Designed for focused, responsible work</strong><span>Review generated content and verify important information before making decisions.</span></div><button type="button" onClick={() => setView("history")}>View activity <ArrowRight size={14}/></button></div>
+              <div className="bottom-note"><div className="bottom-note-icon"><ShieldCheck size={17}/></div><div><strong>Designed for focused, responsible work</strong><span>Review generated content and verify important information before making decisions.</span></div><button type="button" onClick={() => setView("history")}>{tr.view} <ArrowRight size={14}/></button></div>
             </>
           ) : (
             <section className="history-page">
               <div className="eyebrow"><span className="eyebrow-mark"/> YOUR WORK, IN ONE PLACE</div>
-              <div className="history-title-row"><div><h1>Recent <span>activity.</span></h1><p className="hero-description">Your latest AI responses, saved privately in this browser.</p></div>{history.length > 0 && <button className="clear-history" onClick={clearHistory}><Trash2 size={15}/> Clear history</button>}</div>
-              {history.length === 0 ? <div className="empty-history"><div className="empty-icon"><History size={25}/></div><h2>A fresh start.</h2><p>Your completed AI requests will appear here. Your activity is stored only in this browser.</p><button className="generate-btn" onClick={() => setView("workspace")}>Go to workspace <ArrowRight size={15}/></button></div> :
+              <div className="history-title-row"><div><h1>Recent <span>activity.</span></h1><p className="hero-description">{tr.recent}</p></div>{history.length > 0 && <button className="clear-history" onClick={clearHistory}><Trash2 size={15}/> Clear history</button>}</div>
+              {history.length === 0 ? <div className="empty-history"><div className="empty-icon"><History size={25}/></div><h2>{tr.empty}</h2><p>{tr.noActivity}</p><button className="generate-btn" onClick={() => setView("workspace")}>Go to workspace <ArrowRight size={15}/></button></div> :
                 <div className="history-list">{history.map(item => <article className="history-item" key={item.id}><div className={`history-icon ${tools.find(tool => tool.id === item.toolId)?.tint || "violet"}`}>{(() => { const Icon = tools.find(tool => tool.id === item.toolId)?.icon || Sparkles; return <Icon size={18}/>; })()}</div><div className="history-copy"><div className="history-meta"><strong>{item.toolLabel}</strong><span>{new Date(item.createdAt).toLocaleString()}</span></div><p>{item.prompt}</p><span className="history-preview">{item.text.slice(0, 170)}{item.text.length > 170 ? "…" : ""}</span></div><button className="history-open" onClick={() => openHistoryItem(item)} aria-label="Open saved response"><ArrowUpRight size={17}/></button></article>)}</div>}
             </section>
           )}
