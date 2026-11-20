@@ -4,6 +4,8 @@ services:
     runtime: static
     buildCommand: npm install --no-audit && npm audit --omit=dev --audit-level=high && npm run build
     staticPublishPath: ./dist
+    domains:
+      - www.flowchera21.bg5.net
     envVars:
       - key: VITE_API_BASE_URL
         value: https://onlineearninghub-ai.onrender.com
