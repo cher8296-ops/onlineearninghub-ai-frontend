@@ -178,9 +178,9 @@ function App() {
   return (
     <div className={dark ? "app dark" : "app"}>
       <aside className={`sidebar ${mobileNav ? "mobile-open" : ""}`}>
-        <button className="brand" onClick={() => { setView("workspace"); setMobileNav(false); }} aria-label="OnlineEarningHub AI home">
+        <button className="brand" onClick={() => { setView("workspace"); setMobileNav(false); }} aria-label="FlowChera21 home">
           <span className="brand-mark"><Sparkles size={19}/></span>
-          <span className="brand-name">OnlineEarning<span>Hub</span><small>INTELLIGENCE WORKSPACE</small></span>
+          <span className="brand-name">FlowChera21<small>AI EARNING HUB</small></span>
           <span className="brand-version">AI</span>
         </button>
 
@@ -214,7 +214,7 @@ function App() {
             <div className="promo-foot"><span><Zap size={13}/> Four AI tools</span><span>Free access</span></div>
           </div>
           <div className="sidebar-profile">
-            <div className="profile-avatar">OH</div>
+            <div className="profile-avatar">FC</div>
             <div className="profile-text"><strong>Personal workspace</strong><small>Private on this device</small></div>
             <ShieldCheck size={17} className="profile-shield"/>
           </div>
@@ -227,7 +227,7 @@ function App() {
         <header className="topbar">
           <div className="topbar-left">
             <button className="icon-btn mobile-menu" onClick={() => setMobileNav(true)} aria-label="Open menu"><Menu size={20}/></button>
-            <div className="breadcrumb"><span>OnlineEarningHub</span><b>/</b><strong>{view === "history" ? "Recent activity" : currentTool.short}</strong></div>
+            <div className="breadcrumb"><span>FlowChera21</span><b>/</b><strong>{view === "history" ? "Recent activity" : currentTool.short}</strong></div>
           </div>
           <div className="topbar-right">
             <button className={`service-status ${apiStatus}`} onClick={checkHealth} title="Check backend availability">
@@ -311,7 +311,7 @@ function App() {
             </section>
           )}
 
-          <footer className="footer"><span>© {new Date().getFullYear()} OnlineEarningHub AI</span><span className="footer-links"><a href="/about.html">About</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="https://onlineearninghub-ai.onrender.com/docs" target="_blank" rel="noreferrer">API docs</a></span><span><i/> Independent AI workspace <b>·</b> AI output may be inaccurate; verify important information.</span></footer>
+          <footer className="footer"><span>© {new Date().getFullYear()} FlowChera21 · AI Earning Hub</span><span className="footer-links"><a href="/about.html">About</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="https://onlineearninghub-ai.onrender.com/docs" target="_blank" rel="noreferrer">API docs</a></span><span><i/> Independent AI workspace <b>·</b> AI output may be inaccurate; verify important information.</span></footer>
         </div>
       </main>
     </div>
