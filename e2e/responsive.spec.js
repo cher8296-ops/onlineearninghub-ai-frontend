@@ -54,3 +54,22 @@ test("mobile navigation opens and closes", async ({ page }) =>  {
   await page.locator(".mobile-scrim").click();
   await expect(page.locator(".sidebar")).not.toHaveClass(/mobile-open/);
 });
+
+test("SEO metadata and sitemap references are present", async ({ page, request }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await expect(page).toHaveTitle(/FlowChera21/);
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /index/);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://www.flowchera21.bg5.net/");
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute("content", /FlowChera21/);
+  const sitemap = await request.get("/sitemap.xml");
+  expect(sitemap.ok()).toBeTruthy();
+  const xml = await sitemap.text();
+  for (const route of ["/", "/about.html", "/privacy.html", "/terms.html", "/learn.html"]) {
+    expect(xml).toContain(route);
+    const response = await request.get(route);
+    expect(response.status()).toBe(200);
+  }
+  const robots = await request.get("/robots.txt");
+  expect(robots.status()).toBe(200);
+  expect(await robots.text()).toContain("Sitemap: https://www.flowchera21.bg5.net/sitemap.xml");
+});
