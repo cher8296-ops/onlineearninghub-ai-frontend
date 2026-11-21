@@ -177,6 +177,7 @@ function App() {
 
   return (
     <div className={dark ? "app dark" : "app"}>
+      <a className="skip-link" href="#main-content">Skip to main content</a>
       <aside className={`sidebar ${mobileNav ? "mobile-open" : ""}`}>
         <button className="brand" onClick={() => { setView("workspace"); setMobileNav(false); }} aria-label="FlowChera21 home">
           <span className="brand-mark"><Sparkles size={19}/></span>
@@ -223,14 +224,14 @@ function App() {
 
       {mobileNav && <button className="mobile-scrim" onClick={() => setMobileNav(false)} aria-label="Close navigation"/>}
 
-      <main className="main">
+      <main className="main" id="main-content" tabIndex="-1">
         <header className="topbar">
           <div className="topbar-left">
             <button className="icon-btn mobile-menu" onClick={() => setMobileNav(true)} aria-label="Open menu"><Menu size={20}/></button>
             <div className="breadcrumb"><span>FlowChera21</span><b>/</b><strong>{view === "history" ? "Recent activity" : currentTool.short}</strong></div>
           </div>
           <div className="topbar-right">
-            <button className={`service-status ${apiStatus}`} onClick={checkHealth} title="Check backend availability">
+            <button className={`service-status ${apiStatus}`} onClick={checkHealth} title="Check backend availability" aria-label="Check backend availability" aria-live="polite">
               <span className="status-dot"/><span>{apiStatus === "checking" ? "Checking backend" : apiStatus === "online" ? "Backend online" : apiStatus === "not_configured" ? "AI not configured" : "Service unavailable"}</span><RefreshCw size={13} className={apiStatus === "checking" ? "spin" : ""}/>
             </button>
             <span className="topbar-divider"/>
@@ -292,7 +293,7 @@ function App() {
                 {result && !busy && <div className="result-section">
                   <div className="result-heading"><div><div className="result-kicker"><CheckCircle2 size={14}/> RESPONSE READY</div><h3>Your result</h3></div><button type="button" className="copy-btn" onClick={() => copyText(result.text)}>{copied ? <Check size={15}/> : <Copy size={15}/>} {copied ? "Copied" : "Copy response"}</button></div>
                   <div className="result-meta"><span><Sparkles size={13}/> {result.data.agent || currentTool.short}</span>{result.data.model_used && <span>Model: {result.data.model_used}</span>}{typeof result.data.fallback_used === "boolean" && <span className={result.data.fallback_used ? "fallback-note" : "primary-note"}>{result.data.fallback_used ? "Fallback model" : "Primary model"}</span>}</div>
-                  <article className="result-content">{result.text}</article>
+                  <article className="result-content" aria-live="polite">{result.text}</article>
                   {activeTool === "research" && result.data.warning && <div className="research-note"><Globe2 size={15}/> {result.data.warning}</div>}
                   {activeTool === "research" && Array.isArray(result.data.sources) && result.data.sources.length === 0 && !result.data.warning && <div className="research-note"><Globe2 size={15}/> This response is AI-generated and does not contain verified live web sources.</div>}
                   {activeTool === "research" && Array.isArray(result.data.sources) && result.data.sources.some(source => (source?.url?.startsWith("https://") || source?.url?.startsWith("http://"))) && <div className="research-sources"><strong>Sources</strong>{result.data.sources.filter(source => (source?.url?.startsWith("https://") || source?.url?.startsWith("http://"))).map((source, index) => <a key={source.url || index} href={source.url} target="_blank" rel="noreferrer">{source.title || source.url}</a>)}</div>}
