@@ -8,7 +8,7 @@ import {
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || "https://onlineearninghub-ai.onrender.com").replace(/\/+$/, "");
 const HISTORY_KEY = "oeh-ai-history-v1";
-const THEME_KEY = "oeh-ai-theme-v1";
+const THEME_KEY = "oeh-ai-theme-v1";\nconst LANGUAGE_KEY = "oeh-ai-language-v1";\nconst UI_TEXT = { en: { workspace: "Workspace", activity: "Recent activity", capabilities: "AI CAPABILITIES", share: "Share", skip: "Skip to main content", api: "API docs" }, om: { workspace: "Iddoo hojii", activity: "Hojii dhiheenya", capabilities: "DANDEETII AI", share: "Qoodii", skip: "Gara qabiyyee ijoo darbii", api: "API docs" } };
 
 const tools = [
   { id: "plan", label: "Strategic planner", short: "Plan", subtitle: "Turn ambitious goals into clear next steps", icon: Layers3, tint: "violet", eyebrow: "THINK WITH CLARITY", placeholder: "What are you trying to achieve? Share your goal, timeline, resources and constraints.", sample: "Build a practical 30-day plan to launch a beginner-friendly freelance writing service. Include weekly milestones, daily actions, free tools, risks and measurable outcomes." },
@@ -49,7 +49,7 @@ function App() {
   const [dark, setDark] = useState(() => {
     try { return localStorage.getItem(THEME_KEY) === "dark"; } catch { return false; }
   });
-  const [apiStatus, setApiStatus] = useState("checking");
+  const [apiStatus, setApiStatus] = useState("checking");\n  const [language, setLanguage] = useState(() => { try { return localStorage.getItem(LANGUAGE_KEY) === "om" ? "om" : "en"; } catch { return "en"; } });\n  const ui = UI_TEXT[language] || UI_TEXT.en;
   const [history, setHistory] = useState(readHistory);
   const [healthCheckedAt, setHealthCheckedAt] = useState(null);
 
@@ -192,7 +192,7 @@ function App() {
 
   return (
     <div className={dark ? "app dark" : "app"}>
-      <a className="skip-link" href="#main-content">Skip to main content</a>
+      <a className="skip-link" href="#main-content">{ui.skip}</a>
       <aside className={`sidebar ${mobileNav ? "mobile-open" : ""}`}>
         <button className="brand" onClick={() => { setView("workspace"); setMobileNav(false); }} aria-label="FlowChera21 home">
           <span className="brand-mark"><Sparkles size={19}/></span>
@@ -200,22 +200,22 @@ function App() {
           <span className="brand-version">AI</span>
         </button>
 
-        <div className="nav-caption">YOUR WORKSPACE</div>
+        <div className="nav-caption">{language === "om" ? "IDDOO H hojii" : "YOUR WORKSPACE"}</div>
         <nav className="nav-list" aria-label="Workspace navigation">
           <button className={`nav-item ${view === "workspace" ? "active" : ""}`} onClick={() => { setView("workspace"); setMobileNav(false); }}>
-            <span className="nav-icon neutral"><Command size={17}/></span><span>Workspace</span><ChevronRight className="nav-chevron" size={15}/>
+            <span className="nav-icon neutral"><Command size={17}/></span><span>{ui.workspace}</span><ChevronRight className="nav-chevron" size={15}/>
           </button>
           <button className={`nav-item ${view === "history" ? "active" : ""}`} onClick={() => { setView("history"); setMobileNav(false); }}>
-            <span className="nav-icon neutral"><History size={17}/></span><span>Recent activity</span><span className="nav-count">{history.length}</span>
+            <span className="nav-icon neutral"><History size={17}/></span><span>{ui.activity}</span><span className="nav-count">{history.length}</span>
           </button>
         </nav>
 
-        <div className="nav-caption tools-caption">AI CAPABILITIES</div>
+        <div className="nav-caption tools-caption">{ui.capabilities}</div>
         <nav className="nav-list" aria-label="AI tools">
           {tools.map((tool) => {
             const Icon = tool.icon;
             return <button key={tool.id} className={`nav-item ${view === "workspace" && activeTool === tool.id ? "active" : ""}`} onClick={() => chooseTool(tool.id)}>
-              <span className={`nav-icon ${tool.tint}`}><Icon size={17}/></span><span>{tool.short}</span>
+              <span className={`nav-icon ${tool.tint}`}><Icon size={17}/></span><span>{language === "om" ? ({ plan: "Karoora", write: "Barreessi", research: "Qorannoo", check: "Qulqullina" }[tool.id] || tool.short) : tool.short}</span>
               {view === "workspace" && activeTool === tool.id && <span className="active-dot"/>}
             </button>;
           })}
@@ -249,9 +249,9 @@ function App() {
             <button className={`service-status ${apiStatus}`} onClick={checkHealth} title="Check backend availability" aria-label="Check backend availability" aria-live="polite">
               <span className="status-dot"/><span>{apiStatus === "checking" ? "Checking backend" : apiStatus === "online" ? "Backend online" : apiStatus === "not_configured" ? "AI not configured" : "Service unavailable"}</span><RefreshCw size={13} className={apiStatus === "checking" ? "spin" : ""}/>
             </button>
-            <span className="topbar-divider"/>
+            <span className="topbar-divider"/><select className="language-select" value={language} onChange={event => setLanguage(event.target.value)} aria-label="Select language"><option value="en">EN</option><option value="om">OM</option></select>
             <button className="icon-btn theme-btn" onClick={() => setDark(value => !value)} aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}>{dark ? <Sun size={18}/> : <Moon size={18}/>}</button>
-            <a className="topbar-link" href="https://onlineearninghub-ai.onrender.com/docs" target="_blank" rel="noreferrer">API docs <ExternalLink size={13}/></a>
+            <a className="topbar-link" href="https://onlineearninghub-ai.onrender.com/docs" target="_blank" rel="noreferrer">{ui.api} <ExternalLink size={13}/></a>
           </div>
         </header>
 
@@ -263,7 +263,7 @@ function App() {
                   <div className="eyebrow"><span className="eyebrow-mark"/> YOUR IDEAS, WITH MOMENTUM</div>
                   <h1>Think bigger.<br/><span>Move smarter.</span></h1>
                   <p className="hero-description">A focused AI workspace to turn questions into clarity, ideas into action, and good work into great work.</p>
-                  <div className="hero-proof"><span><CheckCircle2 size={15}/> Four focused tools</span><i/><span><Globe2 size={15}/> Made for everyone</span><button type="button" className="share-site-btn" onClick={shareSite}><Share2 size={14}/> Share</button></div>
+                  <div className="hero-proof"><span><CheckCircle2 size={15}/> Four focused tools</span><i/><span><Globe2 size={15}/> Made for everyone</span><button type="button" className="share-site-btn" onClick={shareSite}><Share2 size={14}/> {ui.share}</button></div>
                 </div>
                 <div className="hero-visual" aria-hidden="true">
                   <div className="visual-glow"/><div className="visual-ring ring-a"/><div className="visual-ring ring-b"/>
