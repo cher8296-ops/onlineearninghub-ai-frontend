@@ -6,7 +6,7 @@
       ],
       "numberOfRuns": 3,
       "settings": {
-        "preset": "mobile"
+        "formFactor": "mobile"
       }
     },
     "assert": {
