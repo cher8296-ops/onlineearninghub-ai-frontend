@@ -8,13 +8,17 @@ import {
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || "https://onlineearninghub-ai.onrender.com").replace(/\/+$/, "");
 const HISTORY_KEY = "oeh-ai-history-v1";
-const THEME_KEY = "oeh-ai-theme-v1";\nconst LANGUAGE_KEY = "oeh-ai-language-v1";\nconst UI_TEXT = { en: { workspace: "Workspace", activity: "Recent activity", capabilities: "AI CAPABILITIES", share: "Share", skip: "Skip to main content", api: "API docs" }, om: { workspace: "Iddoo hojii", activity: "Hojii dhiheenya", capabilities: "DANDEETII AI", share: "Qoodii", skip: "Gara qabiyyee ijoo darbii", api: "API docs" } };
+const THEME_KEY = "oeh-ai-theme-v1";
+const LANGUAGE_KEY = "oeh-ai-language-v1";
+const UI_TEXT = { en: { workspace: "Workspace", activity: "Recent activity", capabilities: "AI CAPABILITIES", share: "Share", skip: "Skip to main content", api: "API docs" }, om: { workspace: "Iddoo hojii", activity: "Hojii dhiheenya", capabilities: "DANDEETII AI", share: "Qoodii", skip: "Gara qabiyyee ijoo darbii", api: "API docs" } };
 
 const tools = [
   { id: "plan", label: "Strategic planner", short: "Plan", subtitle: "Turn ambitious goals into clear next steps", icon: Layers3, tint: "violet", eyebrow: "THINK WITH CLARITY", placeholder: "What are you trying to achieve? Share your goal, timeline, resources and constraints.", sample: "Build a practical 30-day plan to launch a beginner-friendly freelance writing service. Include weekly milestones, daily actions, free tools, risks and measurable outcomes." },
   { id: "write", label: "Content studio", short: "Write", subtitle: "Create thoughtful, polished communication", icon: PenLine, tint: "blue", eyebrow: "COMMUNICATE WITH IMPACT", placeholder: "What do you need to create? Include the audience, purpose, format and tone.", sample: "Write a compelling, professional proposal for a beginner applying for a remote blog-writing opportunity. Make it confident, specific and honest about my experience." },
   { id: "research", label: "Research desk", short: "Research", subtitle: "Understand topics, options and opportunities", icon: Microscope, tint: "amber", eyebrow: "DISCOVER WHAT MATTERS", placeholder: "What topic or question should we explore? Add your location, context or decision if relevant.", sample: "Research practical ways for a beginner in Ethiopia to find legitimate international remote freelance work. Explain where to look, eligibility, common scams and first steps. Clearly distinguish verified facts from general guidance." },
-  { id: "check", label: "Quality review", short: "Review", subtitle: "Strengthen work before it goes out", icon: FileCheck2, tint: "green", eyebrow: "RAISE YOUR STANDARD", placeholder: "Paste the work you want reviewed. Tell us the audience and what a successful result should achieve.", sample: "Review the following text for clarity, grammar, tone, structure and persuasiveness. Give a concise assessment, identify specific weaknesses and provide an improved version:\n\n[Paste your text here]" }
+  { id: "check", label: "Quality review", short: "Review", subtitle: "Strengthen work before it goes out", icon: FileCheck2, tint: "green", eyebrow: "RAISE YOUR STANDARD", placeholder: "Paste the work you want reviewed. Tell us the audience and what a successful result should achieve.", sample: "Review the following text for clarity, grammar, tone, structure and persuasiveness. Give a concise assessment, identify specific weaknesses and provide an improved version:
+
+[Paste your text here]" }
 ];
 
 function readHistory() {
@@ -49,7 +53,9 @@ function App() {
   const [dark, setDark] = useState(() => {
     try { return localStorage.getItem(THEME_KEY) === "dark"; } catch { return false; }
   });
-  const [apiStatus, setApiStatus] = useState("checking");\n  const [language, setLanguage] = useState(() => { try { return localStorage.getItem(LANGUAGE_KEY) === "om" ? "om" : "en"; } catch { return "en"; } });\n  const ui = UI_TEXT[language] || UI_TEXT.en;
+  const [apiStatus, setApiStatus] = useState("checking");
+  const [language, setLanguage] = useState(() => { try { return localStorage.getItem(LANGUAGE_KEY) === "om" ? "om" : "en"; } catch { return "en"; } });
+  const ui = UI_TEXT[language] || UI_TEXT.en;
   const [history, setHistory] = useState(readHistory);
   const [healthCheckedAt, setHealthCheckedAt] = useState(null);
 
