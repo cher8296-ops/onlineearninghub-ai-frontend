@@ -3,7 +3,7 @@ import {
   ArrowRight, ArrowUpRight, Check, CheckCircle2, ChevronRight, Clipboard,
   Clock3, Command, FileCheck2, Globe2, History, Layers3, LoaderCircle,
   Menu, Microscope, Moon, PenLine, Plus, RefreshCw, ShieldCheck, Sparkles,
-  Sun, WandSparkles, X, Zap, Trash2, Copy, ExternalLink
+  Sun, WandSparkles, X, Zap, Trash2, Copy, ExternalLink, Share2
 } from "lucide-react";
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || "https://onlineearninghub-ai.onrender.com").replace(/\/+$/, "");
@@ -152,6 +152,21 @@ function App() {
     }
   };
 
+  const shareSite = async () => {
+    const shareData = { title: "FlowChera21 — AI Earning Hub", text: "A focused AI workspace to plan, write, research and quality-check your work.", url: window.location.href };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareData.url);
+        setCopied(true);
+        window.setTimeout(() => setCopied(false), 1800);
+      }
+    } catch (err) {
+      if (err?.name !== "AbortError") setError("Sharing is unavailable here. You can copy the website address from your browser.");
+    }
+  };
+
   const copyText = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -248,7 +263,7 @@ function App() {
                   <div className="eyebrow"><span className="eyebrow-mark"/> YOUR IDEAS, WITH MOMENTUM</div>
                   <h1>Think bigger.<br/><span>Move smarter.</span></h1>
                   <p className="hero-description">A focused AI workspace to turn questions into clarity, ideas into action, and good work into great work.</p>
-                  <div className="hero-proof"><span><CheckCircle2 size={15}/> Four focused tools</span><i/><span><Globe2 size={15}/> Made for everyone</span></div>
+                  <div className="hero-proof"><span><CheckCircle2 size={15}/> Four focused tools</span><i/><span><Globe2 size={15}/> Made for everyone</span><button type="button" className="share-site-btn" onClick={shareSite}><Share2 size={14}/> Share</button></div>
                 </div>
                 <div className="hero-visual" aria-hidden="true">
                   <div className="visual-glow"/><div className="visual-ring ring-a"/><div className="visual-ring ring-b"/>
@@ -312,7 +327,7 @@ function App() {
             </section>
           )}
 
-          <footer className="footer"><span>© {new Date().getFullYear()} FlowChera21 · AI Earning Hub</span><span className="footer-links"><a href="/about.html">About</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="https://onlineearninghub-ai.onrender.com/docs" target="_blank" rel="noreferrer">API docs</a></span><span><i/> Independent AI workspace <b>·</b> AI output may be inaccurate; verify important information.</span></footer>
+          <footer className="footer"><span>© {new Date().getFullYear()} FlowChera21 · AI Earning Hub</span><span className="footer-links"><a href="/learn.html">Learn</a><a href="/about.html">About</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="https://onlineearninghub-ai.onrender.com/docs" target="_blank" rel="noreferrer">API docs</a></span><span><i/> Independent AI workspace <b>·</b> AI output may be inaccurate; verify important information.</span></footer>
         </div>
       </main>
     </div>
