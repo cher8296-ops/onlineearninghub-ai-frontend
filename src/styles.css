@@ -22,3 +22,9 @@
 .footer-links a:hover{text-decoration:underline;text-underline-offset:3px}
 .dark .footer-links a{color:#b2a5ff}
 @media(max-width:520px){.footer-links{gap:14px}}
+
+/* International accessibility and keyboard usability improvements */
+.skip-link{position:fixed;top:8px;left:8px;z-index:1000;padding:12px 16px;border-radius:8px;background:#11182a;color:#fff;transform:translateY(-150%);transition:transform .15s ease}.skip-link:focus{transform:translateY(0)}
+:where(a,button,textarea,[tabindex]):focus-visible{outline:3px solid #7059e8;outline-offset:3px}
+button,a{touch-action:manipulation}
+#main-content:focus{outline:none}
