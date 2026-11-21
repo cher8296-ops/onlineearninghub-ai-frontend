@@ -13,7 +13,7 @@ permissions:
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,14 +32,18 @@ jobs:
           done
           echo "Site did not respond within the wait period." >&2
           exit 1
-      - name: Run Lighthouse CI against production
+      - name: Run Lighthouse desktop against production
         run: npx --yes @lhci/cli@0.15.0 autorun --config=.lighthouserc.json
+      - name: Run Lighthouse mobile against production
+        run: npx --yes @lhci/cli@0.15.0 autorun --config=.lighthouserc-mobile.json
       - name: Upload Lighthouse reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lighthouse-core-web-vitals-report
-          path: .lighthouseci
+          name: lighthouse-desktop-mobile-reports
+          path: |
+            .lighthouseci
+            .lighthouseci-mobile
           if-no-files-found: warn
           include-hidden-files: true
           retention-days: 14
