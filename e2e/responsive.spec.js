@@ -41,7 +41,7 @@ test("four AI tool cards are visible and can be selected", async ({ page }) => {
 test("Oromo language selector switches interface labels", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.locator(".language-select").selectOption("om");
-  await expect(page.locator(".section-heading h2")).toBeVisible();
+  await expect(page.locator(".section-heading h2")).toHaveText("Maali irratti hojjechaa jirra?");
 });
 
 test("mobile navigation opens and closes", async ({ page }) =>  {
