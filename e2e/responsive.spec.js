@@ -61,15 +61,15 @@ test("SEO metadata and sitemap references are present", async ({ page, request }
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /index/);
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://www.flowchera21.bg5.net/");
   await expect(page.locator('meta[property="og:title"]')).toHaveAttribute("content", /FlowChera21/);
-  const sitemap = await request.get("/sitemap.xml");
+  const sitemap = await request.get("https://www.flowchera21.bg5.net/sitemap.xml");
   expect(sitemap.ok()).toBeTruthy();
   const xml = await sitemap.text();
   for (const route of ["/", "/about.html", "/privacy.html", "/terms.html", "/learn.html"]) {
     expect(xml).toContain(route);
-    const response = await request.get(route);
+    const response = await request.get("https://www.flowchera21.bg5.net" + route);
     expect(response.status()).toBe(200);
   }
-  const robots = await request.get("/robots.txt");
+  const robots = await request.get("https://www.flowchera21.bg5.net/robots.txt");
   expect(robots.status()).toBe(200);
   expect(await robots.text()).toContain("Sitemap: https://www.flowchera21.bg5.net/sitemap.xml");
 });
