@@ -41,3 +41,5 @@ button,a{touch-action:manipulation}
   .hero-proof{flex-wrap:wrap;}
   .footer,.footer-links{overflow-wrap:anywhere;}
 }
+
+@media(max-width:520px){.hero{overflow:clip}.hero-visual{overflow:clip}}
