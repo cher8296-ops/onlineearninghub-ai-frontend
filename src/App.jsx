@@ -65,6 +65,8 @@ function App() {
     try { localStorage.setItem(THEME_KEY, dark ? "dark" : "light"); } catch {}
   }, [dark]);
 
+  useEffect(() => { try { localStorage.setItem(LANGUAGE_KEY, language); } catch {} }, [language]);
+
   useEffect(() => {
     try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 12))); } catch {}
   }, [history]);
