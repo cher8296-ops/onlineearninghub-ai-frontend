@@ -41,15 +41,6 @@ services:
         name: Cross-Origin-Resource-Policy
         value: same-origin
       - path: /*
-        name: X-XSS-Protection
-        value: "0"
-      - path: /*
-        name: Cross-Origin-Opener-Policy
-        value: same-origin
-      - path: /*
-        name: Cross-Origin-Resource-Policy
-        value: same-origin
-      - path: /*
         name: Content-Security-Policy
         value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://onlineearninghub-ai.onrender.com; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'"
     routes:
