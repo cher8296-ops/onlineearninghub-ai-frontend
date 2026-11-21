@@ -28,3 +28,5 @@
 :where(a,button,textarea,[tabindex]):focus-visible{outline:3px solid #7059e8;outline-offset:3px}
 button,a{touch-action:manipulation}
 #main-content:focus{outline:none}
+
+.share-site-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid #dcd6ff;border-radius:20px;background:#faf9ff;color:#7967dc;font-size:9px;font-weight:700;cursor:pointer;white-space:nowrap}.share-site-btn:hover{background:#f0edff}.dark .share-site-btn{background:#262440;border-color:#39345d;color:#b2a5ff}@media(max-width:520px){.share-site-btn{padding:5px 7px;font-size:8px}}
