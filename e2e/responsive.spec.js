@@ -19,6 +19,13 @@ for (const viewport of viewports) {
       width: document.documentElement.clientWidth,
       scrollWidth: document.documentElement.scrollWidth,
     }));
+    if (overflow.scrollWidth > overflow.width + 1) {
+      const offenders = await page.evaluate(() => Array.from(document.querySelectorAll("body *")).map(el => {
+        const r = el.getBoundingClientRect();
+        return {tag:el.tagName, cls:typeof el.className==="string"?el.className:"", text:(el.innerText||"").slice(0,60), left:Math.round(r.left), right:Math.round(r.right), width:Math.round(r.width)};
+      }).filter(item => item.right > innerWidth + 2 || item.left < -2).sort((a,b)=>b.right-a.right).slice(0,15));
+      console.log(`Overflow diagnostic ${viewport.name}:`, JSON.stringify(offenders));
+    }
     expect(overflow.scrollWidth, `Horizontal overflow at ${viewport.name}`).toBeLessThanOrEqual(overflow.width + 1);
   });
 }
