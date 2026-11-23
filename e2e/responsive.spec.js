@@ -73,3 +73,27 @@ test("SEO metadata and sitemap references are present", async ({ page, request }
   expect(robots.status()).toBe(200);
   expect(await robots.text()).toContain("Sitemap: https://www.flowchera21.bg5.net/sitemap.xml");
 });
+
+
+test("sitemap is well-formed XML and has no trailing non-XML text", async ({ request }) => {
+  const response = await request.get("https://www.flowchera21.bg5.net/sitemap.xml");
+  expect(response.status()).toBe(200);
+  const xml = await response.text();
+  expect(xml.trim()).toMatch(/^<\?xml[\\s\\S]*<urlset[\\s\\S]*<\/urlset>$/);
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  expect(doc.querySelector("parsererror")).toBeNull();
+  expect(doc.documentElement.localName).toBe("urlset");
+  expect(doc.documentElement.namespaceURI).toBe("http://www.sitemaps.org/schemas/sitemap/0.9");
+  expect(xml.trim().endsWith("</urlset>")).toBeTruthy();
+});
+
+test("legal and about pages keep FlowChera21 branding and canonical www host", async ({ request }) => {
+  for (const route of ["/about.html", "/privacy.html", "/terms.html"]) {
+    const response = await request.get("https://www.flowchera21.bg5.net" + route);
+    expect(response.status()).toBe(200);
+    const html = await response.text();
+    expect(html).toContain("FlowChera21");
+    expect(html).toContain('href="https://www.flowchera21.bg5.net' + route + '"');
+    expect(html).not.toContain("OnlineEarningHub AI");
+  }
+});
