@@ -78,7 +78,7 @@ test("SEO metadata and sitemap references are present", async ({ page, request }
 test("local sitemap is valid XML and contains no trailing non-XML text", async ({ page }) => {
   const fs = await import("node:fs/promises");
   const xml = await fs.readFile("public/sitemap.xml", "utf8");
-  expect(xml.trim()).toMatch(/^<\\?xml[\\s\\S]*<urlset[\\s\\S]*<\\/urlset>$/);
+  expect(xml.trim()).toMatch(/^<\?xml[\s\S]*<urlset[\s\S]*<\/urlset>$/);
   const parsed = await page.evaluate((xmlText) => {
     const doc = new DOMParser().parseFromString(xmlText, "application/xml");
     return { hasParserError: !!doc.querySelector("parsererror"), rootName: doc.documentElement.localName, namespace: doc.documentElement.namespaceURI };
