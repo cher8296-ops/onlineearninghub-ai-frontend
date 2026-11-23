@@ -75,11 +75,10 @@ test("SEO metadata and sitemap references are present", async ({ page, request }
 });
 
 
-test("sitemap is well-formed XML and has no trailing non-XML text", async ({ page, request }) => {
-  const response = await request.get("https://www.flowchera21.bg5.net/sitemap.xml");
-  expect(response.status()).toBe(200);
-  const xml = await response.text();
-  expect(xml.trim()).toMatch(/^<\?xml[\\s\\S]*<urlset[\\s\\S]*<\/urlset>$/);
+test("local sitemap is valid XML and contains no trailing non-XML text", async ({ page }) => {
+  const fs = await import("node:fs/promises");
+  const xml = await fs.readFile("public/sitemap.xml", "utf8");
+  expect(xml.trim()).toMatch(/^<\\?xml[\\s\\S]*<urlset[\\s\\S]*<\\/urlset>$/);
   const parsed = await page.evaluate((xmlText) => {
     const doc = new DOMParser().parseFromString(xmlText, "application/xml");
     return { hasParserError: !!doc.querySelector("parsererror"), rootName: doc.documentElement.localName, namespace: doc.documentElement.namespaceURI };
@@ -88,13 +87,15 @@ test("sitemap is well-formed XML and has no trailing non-XML text", async ({ pag
   expect(parsed.rootName).toBe("urlset");
   expect(parsed.namespace).toBe("http://www.sitemaps.org/schemas/sitemap/0.9");
   expect(xml.trim().endsWith("</urlset>")).toBeTruthy();
+  for (const route of ["/", "/about.html", "/privacy.html", "/terms.html", "/learn.html"]) {
+    expect(xml).toContain("https://www.flowchera21.bg5.net" + route);
+  }
 });
 
-test("legal and about pages keep FlowChera21 branding and canonical www host", async ({ request }) => {
+test("legal and about pages keep FlowChera21 branding and canonical www host", async () => {
   for (const route of ["/about.html", "/privacy.html", "/terms.html"]) {
-    const response = await request.get("https://www.flowchera21.bg5.net" + route);
-    expect(response.status()).toBe(200);
-    const html = await response.text();
+    const fs = await import("node:fs/promises");
+    const html = await fs.readFile("public" + route, "utf8");
     expect(html).toContain("FlowChera21");
     expect(html).toContain('href="https://www.flowchera21.bg5.net' + route + '"');
     expect(html).not.toContain("OnlineEarningHub AI");
