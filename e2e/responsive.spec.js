@@ -75,15 +75,18 @@ test("SEO metadata and sitemap references are present", async ({ page, request }
 });
 
 
-test("sitemap is well-formed XML and has no trailing non-XML text", async ({ request }) => {
+test("sitemap is well-formed XML and has no trailing non-XML text", async ({ page, request }) => {
   const response = await request.get("https://www.flowchera21.bg5.net/sitemap.xml");
   expect(response.status()).toBe(200);
   const xml = await response.text();
   expect(xml.trim()).toMatch(/^<\?xml[\\s\\S]*<urlset[\\s\\S]*<\/urlset>$/);
-  const doc = new DOMParser().parseFromString(xml, "application/xml");
-  expect(doc.querySelector("parsererror")).toBeNull();
-  expect(doc.documentElement.localName).toBe("urlset");
-  expect(doc.documentElement.namespaceURI).toBe("http://www.sitemaps.org/schemas/sitemap/0.9");
+  const parsed = await page.evaluate((xmlText) => {
+    const doc = new DOMParser().parseFromString(xmlText, "application/xml");
+    return { hasParserError: !!doc.querySelector("parsererror"), rootName: doc.documentElement.localName, namespace: doc.documentElement.namespaceURI };
+  }, xml);
+  expect(parsed.hasParserError).toBeFalsy();
+  expect(parsed.rootName).toBe("urlset");
+  expect(parsed.namespace).toBe("http://www.sitemaps.org/schemas/sitemap/0.9");
   expect(xml.trim().endsWith("</urlset>")).toBeTruthy();
 });
 
