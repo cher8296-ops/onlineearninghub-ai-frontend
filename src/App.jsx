@@ -66,6 +66,31 @@ function App() {
   const currentTool = useMemo(() => tools.find(item => item.id === activeTool) || tools[0], [activeTool]);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const topic = params.get("topic");
+    const requestedTool = params.get("tool");
+    const allowedTools = ["plan", "write", "research", "check"];
+    if (!topic) return;
+    const selectedTool = allowedTools.includes(requestedTool) ? requestedTool : "plan";
+    const prompts = {
+      finance: { en: "Create a responsible YouTube content strategy about personal finance, budgeting, saving and beginner investing education. Include a 4-week calendar, 3 long-form video outlines, 5 Shorts ideas, audience profile, evidence-checking sources, risk disclosures and ethical monetization ideas. Do not promise returns or give personalized investment advice.", om: "Barnoota faayinaansii dhuunfaa, baajata, qusannaa fi invastimantii jalqabaa irratti tarsiimoo YouTube itti gaafatamummaa qabu qopheessi. Karoora torban 4, caasaa video dheeraa 3, yaada Shorts 5, daawwataa kaayyoo, madda mirkaneessaa, ibsa balaa fi mala galii naamusa qabu dabali. Bu'aa invastimantii hin waadaa galin; gorsa invastimantii dhuunfaa hin kennin." },
+      technology: { en: "Create a practical YouTube channel plan about technology, software, AI tools, website building and cybersecurity awareness. Include beginner-friendly tutorials, a 4-week calendar, 3 long-form outlines, 5 Shorts, hands-on demonstrations, fact-checking and sponsorship disclosure guidance.", om: "Teeknooloojii, software, meeshaalee AI, ijaarsa website fi hubannoo cybersecurity irratti karoora channel YouTube qabatamaa qopheessi. Leenjii jalqabaa, karoora torban 4, caasaa video dheeraa 3, yaada Shorts 5, agarsiisa qabatamaa, mirkaneessa dhugaa fi ibsa sponsorship dabali." },
+      education: { en: "Create an educational YouTube content plan for language learning, Excel, data skills, coding, communication and career development. Include learning outcomes, a 4-week publishing calendar, lesson outlines, practice tasks, 3 long-form ideas, 5 Shorts and ways to measure learner progress.", om: "Barumsa afaanii, Excel, dandeettii data, coding, qunnamtii fi guddina hojii irratti karoora qabiyyee YouTube qopheessi. Bu'aa barnootaa, karoora maxxansaa torban 4, caasaa barnootaa, shaakala, yaada video dheeraa 3, Shorts 5 fi guddina barataa ittiin madaalan dabali." },
+      health: { en: "Create a safe, evidence-based YouTube education plan about general wellness, healthy routines and beginner fitness. Include a 4-week calendar, 3 long-form outlines, 5 Shorts, reputable medical source checks, safety disclaimers and clear boundaries against diagnosis or personalized treatment advice.", om: "Jireenya fayya-qabeessa, amala gaarii fi fitness jalqabaa irratti karoora barnoota YouTube nageenya qabu, ragaa irratti hundaa'e qopheessi. Karoora torban 4, caasaa video dheeraa 3, Shorts 5, madda yaalaa amanamaa, akeekkachiisa nageenyaa fi daangaa dhukkuba adda baasuu ykn yaala dhuunfaa kennuu irraa fagaachuu dabali." },
+      property: { en: "Create a jurisdiction-aware YouTube education plan about real estate, home buying, renting, legal basics and insurance literacy. Include a 4-week calendar, 3 long-form outlines, 5 Shorts, official-source verification and disclaimers that laws and insurance terms vary by location.", om: "Qabeenya, mana bituu, kiraa, seera bu'uuraa fi hubannoo inshuraansii irratti karoora barnoota YouTube biyya/seera ilaallatu ibsu qopheessi. Karoora torban 4, caasaa video dheeraa 3, Shorts 5, madda mootummaa mirkaneessuu fi seerri akkasumas inshuraansiin bakka irratti akka garaagarummaa qabu ibsa dabali." },
+      audience: { en: "Build a YouTube audience strategy focused on country, language, viewer needs and advertiser suitability. Explain CPM versus RPM accurately, propose ethical audience research, a 4-week experiment plan and Analytics metrics. Never recommend buying views or faking audience location, and do not guarantee earnings.", om: "Biyya, afaan, fedhii daawwataa fi mijataa beeksisaa irratti xiyyeeffachuun tarsiimoo daawwataa YouTube ijaari. CPM fi RPM sirriitti ibsi; qorannoo daawwataa naamusa qabu, karoora yaalii torban 4 fi safartuu Analytics dabali. View bituu ykn biyya daawwataa sobaan agarsiisuu hin gorsin; galii hin waadaa galin." },
+      video: { en: "Create a YouTube publishing strategy comparing long-form videos and Shorts. Explain the 8-minute mid-roll eligibility rule without promising ad delivery, distinguish Shorts Feed monetization, and provide a 4-week plan with 3 long-form outlines, 8 Shorts ideas, repurposing workflow and performance metrics.", om: "Tarsiimoo maxxansaa YouTube video dheeraa fi Shorts wal bira qabu qopheessi. Ulaagaa daqiiqaa 8 mid-roll ibsi garuu beeksisni akka tajaajilu hin waadaa galin; galii Shorts Feed adda baasi; karoora torban 4, caasaa video dheeraa 3, yaada Shorts 8, mala qabiyyee irra deebi'anii fayyadamuu fi safartuu raawwii dabali." }
+    };
+    const selected = prompts[topic];
+    if (!selected) return;
+    setActiveTool(selectedTool);
+    setView("workspace");
+    setPrompt(selected[language] || selected.en);
+    window.history.replaceState({}, "", window.location.pathname);
+  }, []);
+
+
+  useEffect(() => {
     try { localStorage.setItem(THEME_KEY, dark ? "dark" : "light"); } catch {}
   }, [dark]);
 
