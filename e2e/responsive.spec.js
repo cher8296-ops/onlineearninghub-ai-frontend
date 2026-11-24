@@ -111,3 +111,16 @@ test("creator niche learning guide covers bilingual topics and official YouTube 
   await expect(page.getByRole("link", { name: "Understand CPM and RPM" })).toHaveAttribute("href", "https://support.google.com/youtube/answer/9314357");
   await expect(page.getByText(/ad slots are not guaranteed/i)).toBeVisible();
 });
+
+
+test("all seven creator niche actions open the AI planner with a relevant prompt", async ({ page }) => {
+  const topics = ["finance", "technology", "education", "health", "property", "audience", "video"];
+  for (const topic of topics) {
+    await page.goto("/learn.html", { waitUntil: "domcontentloaded" });
+    const action = page.locator(`a[href="/?tool=plan&topic=${topic}"]`);
+    await expect(action).toBeVisible();
+    await action.click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("textarea").first()).not.toHaveValue("");
+  }
+});
