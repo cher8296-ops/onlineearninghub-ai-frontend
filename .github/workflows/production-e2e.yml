@@ -1,0 +1,48 @@
+name: FlowChera21 production E2E
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every Monday at 06:00 East Africa Time (03:00 UTC).
+    - cron: "0 3 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: flowchera21-production-e2e
+  cancel-in-progress: false
+
+jobs:
+  production-e2e:
+    name: Responsive, navigation and SEO smoke tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run production browser tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flowchera21-production-e2e-diagnostics
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
