@@ -62,3 +62,13 @@ body .powered-label{font-size:12px!important}
 body .prompt-wrap textarea{font-size:14px!important}
 body.dark .breadcrumb,body.dark .hero-description,body.dark .hero-proof,body.dark .section-kicker,body.dark .section-note,body.dark .tool-index,body.dark .tool-card p,body.dark .panel-kicker,body.dark .panel-heading p,body.dark .prompt-footer,body.dark .privacy-note,body.dark .bottom-note span,body.dark .footer,body.dark .service-status{color:#d1d5db!important}
 body.dark .eyebrow,body.dark .tool-open,body.dark .powered-label,body.dark .sample-btn,body.dark .bottom-note>button,body.dark .footer-links a,body.dark .share-site-btn{color:#c4b5fd!important}
+
+
+/* Mobile fit: keep the primary toolbar compact and remove decorative overflow. */
+@media(max-width:520px){
+  .topbar-link{display:none!important}
+  .hero-visual{display:none!important}
+  .hero{overflow:visible}
+  .content{padding-left:16px;padding-right:16px}
+  .topbar{padding-left:16px;padding-right:16px}
+}
