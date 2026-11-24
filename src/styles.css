@@ -52,11 +52,13 @@ button,a{touch-action:manipulation}
 ::selection{background:#dcd6ff;color:#20184f}
 
 
+
+
 /* Accessibility remediation: WCAG 2.2 AA text contrast and readable mobile typography. */
 body :where(p,span,a,button,label,small,li,dt,dd,input,textarea,select){font-size:max(12px,1em)!important}
-body :where(.breadcrumb,.hero-description,.hero-proof,.section-kicker,.section-note,.tool-index,.tool-card p,.panel-kicker,.panel-heading p,.prompt-footer,.privacy-note,.bottom-note span,.footer,.service-status){color:#4b5563}
-body :where(.eyebrow,.tool-open,.powered-label,.sample-btn,.bottom-note>button,.footer-links a,.share-site-btn){color:#5942ad}
+body .breadcrumb,body .hero-description,body .hero-proof,body .section-kicker,body .section-note,body .tool-index,body .tool-card p,body .panel-kicker,body .panel-heading p,body .prompt-footer,body .privacy-note,body .bottom-note span,body .footer,body .service-status{color:#4b5563!important}
+body .eyebrow,body .tool-open,body .powered-label,body .sample-btn,body .bottom-note>button,body .footer-links a,body .share-site-btn{color:#5942ad!important}
 body .powered-label{font-size:12px!important}
 body .prompt-wrap textarea{font-size:14px!important}
-.dark :where(.breadcrumb,.hero-description,.hero-proof,.section-kicker,.section-note,.tool-index,.tool-card p,.panel-kicker,.panel-heading p,.prompt-footer,.privacy-note,.bottom-note span,.footer,.service-status){color:#d1d5db}
-.dark :where(.eyebrow,.tool-open,.powered-label,.sample-btn,.bottom-note>button,.footer-links a,.share-site-btn){color:#c4b5fd}
+body.dark .breadcrumb,body.dark .hero-description,body.dark .hero-proof,body.dark .section-kicker,body.dark .section-note,body.dark .tool-index,body.dark .tool-card p,body.dark .panel-kicker,body.dark .panel-heading p,body.dark .prompt-footer,body.dark .privacy-note,body.dark .bottom-note span,body.dark .footer,body.dark .service-status{color:#d1d5db!important}
+body.dark .eyebrow,body.dark .tool-open,body.dark .powered-label,body.dark .sample-btn,body.dark .bottom-note>button,body.dark .footer-links a,body.dark .share-site-btn{color:#c4b5fd!important}
