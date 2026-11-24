@@ -283,7 +283,7 @@ function App() {
             <div className="breadcrumb"><span>FlowChera21</span><b>/</b><strong>{view === "history" ? ui.activity : (toolLabels ? toolLabels[activeTool] : currentTool.short)}</strong></div>
           </div>
           <div className="topbar-right">
-            <button className={`service-status ${apiStatus}`} onClick={checkHealth} title={ui.statusCheck} aria-label={`${apiStatus === "checking" ? ui.statusChecking : apiStatus === "online" ? ui.statusOnline : apiStatus === "not_configured" ? ui.statusNotConfigured : ui.statusIssue}. ${ui.statusCheck}`} aria-live="polite">
+            <button className={`service-status ${apiStatus}`} onClick={checkHealth} title={ui.statusCheck} aria-live="polite">
               <span className="status-dot"/><span>{apiStatus === "checking" ? ui.statusChecking : apiStatus === "online" ? ui.statusOnline : apiStatus === "not_configured" ? ui.statusNotConfigured : ui.statusIssue}</span><RefreshCw size={13} className={apiStatus === "checking" ? "spin" : ""}/>
             </button>
             <span className="topbar-divider"/><select className="language-select" value={language} onChange={event => setLanguage(event.target.value)} aria-label="Select language"><option value="en">EN</option><option value="om">OM</option></select>
