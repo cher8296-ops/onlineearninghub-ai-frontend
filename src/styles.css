@@ -50,3 +50,13 @@ button,a{touch-action:manipulation}
 :where(.nav-item,.service-status,.icon-btn,.history-open,.clear-history,.language-select,.sample-btn,.copy-btn,.secondary-btn,.generate-btn){line-height:1.4}
 :where(.hero-description,.tool-card p,.panel-heading p,.privacy-note,.result-content,.history-copy p,.empty-history p){line-height:1.65}
 ::selection{background:#dcd6ff;color:#20184f}
+
+
+/* Accessibility remediation: WCAG 2.2 AA text contrast and readable mobile typography. */
+body :where(p,span,a,button,label,small,li,dt,dd,input,textarea,select){font-size:max(12px,1em)!important}
+body :where(.breadcrumb,.hero-description,.hero-proof,.section-kicker,.section-note,.tool-index,.tool-card p,.panel-kicker,.panel-heading p,.prompt-footer,.privacy-note,.bottom-note span,.footer,.service-status){color:#4b5563}
+body :where(.eyebrow,.tool-open,.powered-label,.sample-btn,.bottom-note>button,.footer-links a,.share-site-btn){color:#5942ad}
+body .powered-label{font-size:12px!important}
+body .prompt-wrap textarea{font-size:14px!important}
+.dark :where(.breadcrumb,.hero-description,.hero-proof,.section-kicker,.section-note,.tool-index,.tool-card p,.panel-kicker,.panel-heading p,.prompt-footer,.privacy-note,.bottom-note span,.footer,.service-status){color:#d1d5db}
+.dark :where(.eyebrow,.tool-open,.powered-label,.sample-btn,.bottom-note>button,.footer-links a,.share-site-btn){color:#c4b5fd}
