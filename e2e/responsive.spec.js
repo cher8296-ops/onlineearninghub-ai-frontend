@@ -101,3 +101,13 @@ test("legal and about pages keep FlowChera21 branding and canonical www host", a
     expect(html).not.toContain("OnlineEarningHub AI");
   }
 });
+
+
+test("creator niche learning guide covers bilingual topics and official YouTube references", async ({ page }) => {
+  await page.goto("/learn.html", { waitUntil: "domcontentloaded" });
+  await expect(page.locator("#creator-niches-title")).toBeVisible();
+  await expect(page.locator(".niche-card")).toHaveCount(7);
+  await expect(page.locator('[lang="om"]').first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Understand CPM and RPM" })).toHaveAttribute("href", "https://support.google.com/youtube/answer/9314357");
+  await expect(page.getByText(/ad slots are not guaranteed/i)).toBeVisible();
+});
