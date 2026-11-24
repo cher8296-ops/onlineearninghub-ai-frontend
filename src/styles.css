@@ -74,3 +74,15 @@ body.dark .eyebrow,body.dark .tool-open,body.dark .powered-label,body.dark .samp
 }
 
 @media(max-width:520px){body .topbar-right .topbar-link{display:none!important}body .hero .hero-visual{display:none!important}}
+
+/* Compact header controls on the narrowest supported phones (320px). */
+@media(max-width:360px){
+  .topbar{padding-left:8px;padding-right:8px;gap:5px}
+  .topbar-left,.topbar-right{gap:4px;min-width:0}
+  .breadcrumb{gap:4px;font-size:12px;white-space:nowrap}
+  .topbar-right{flex:none}
+  .service-status{width:32px;min-width:32px;height:32px;padding:0;justify-content:center;overflow:hidden}
+  .service-status span:not(.status-dot),.service-status svg,.topbar-divider{display:none!important}
+  .language-select{min-width:37px;padding-left:3px;padding-right:3px}
+  .icon-btn.theme-btn{width:32px;min-width:32px;height:32px}
+}
