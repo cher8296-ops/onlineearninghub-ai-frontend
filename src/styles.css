@@ -86,3 +86,7 @@ body.dark .eyebrow,body.dark .tool-open,body.dark .powered-label,body.dark .samp
   .language-select{min-width:37px;padding-left:3px;padding-right:3px}
   .icon-btn.theme-btn{width:32px;min-width:32px;height:32px}
 }
+
+/* Health endpoint confirms API reachability, not live model quota or generation. */
+.service-status.unverified{border-color:#e7c98e;color:#875d19;background:#fffaf0}.service-status.unverified .status-dot{background:#d69a32;box-shadow:0 0 0 3px #d69a321c}
+.dark .service-status.unverified{border-color:#795c2e;color:#f0cc83;background:#302719}
