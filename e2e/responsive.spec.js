@@ -129,7 +129,7 @@ test("Video Studio opens from workspace navigation and exposes production planni
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: /Video Studio/ }).click();
   await expect(page.getByRole("heading", { name: "FlowChera21 Video Studio" })).toBeVisible();
-  await expect(page.getByText(/short motion-graphic videos in your browser/i)).toBeVisible();
+  await expect(page.getByText(/Create MP4 on the server/i)).toBeVisible();
   await expect(page.getByLabel("Video topic")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Scene storyboard" })).toBeVisible();
 });
