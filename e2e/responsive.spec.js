@@ -124,3 +124,12 @@ test("all seven creator niche actions open the AI planner with a relevant prompt
     await expect(page.locator("textarea").first()).not.toHaveValue("");
   }
 });
+
+test("Video Studio opens from workspace navigation and exposes production planning controls", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: /Video Studio/ }).click();
+  await expect(page.getByRole("heading", { name: "FlowChera21 Video Studio" })).toBeVisible();
+  await expect(page.getByText(/AI voice recording, video rendering and automatic MP4 export are not enabled/i)).toBeVisible();
+  await expect(page.getByLabel("Video topic")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Scene storyboard" })).toBeVisible();
+});
