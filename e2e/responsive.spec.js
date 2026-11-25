@@ -153,5 +153,5 @@ test("Video Studio renders and downloads a real browser-recorded WebM file", asy
   const downloadPromise = page.waitForEvent("download", { timeout: 20000 });
   await page.getByRole("button", { name: /Create free video \(WebM\)/ }).click();
   const download = await downloadPromise;
-  expect(download.suggestedFilename()).toMatch(/\\.webm$/i);
+  expect(download.suggestedFilename()).toMatch(/\.webm$/i);
 });
