@@ -166,6 +166,10 @@ export default function VideoStudio({ language = "en", onBack, standalone = fals
       ctx.fillStyle="#ffffff"; ctx.font="400 25px Arial"; drawText(scene.narration || "",90,598,1100,34,2);
       ctx.fillStyle="rgba(255,255,255,.25)"; ctx.fillRect(80,685,1120,5);
       ctx.fillStyle="#9fe7d3"; ctx.fillRect(80,685,1120*progress,5);
+      const fadeIn = Math.min(1, elapsed / 0.7);
+      const fadeOut = Math.min(1, Math.max(0, (sceneDuration - elapsed) / 0.7));
+      ctx.fillStyle = "rgba(0,0,0," + (1 - Math.min(fadeIn, fadeOut)) + ")";
+      ctx.fillRect(0, 0, 1280, 720);
     };
     try {
       recorder.start(250);
@@ -212,9 +216,9 @@ export default function VideoStudio({ language = "en", onBack, standalone = fals
       cursor += Math.max(1, Number(scene.seconds) || 1);
       const end = cursor;
       const text = String(scene.narration || "").trim();
-      return text ? (index + 1) + "\\n" + formatSrtTime(start) + " --> " + formatSrtTime(end) + "\\n" + text : null;
+      return text ? (index + 1) + "\n" + formatSrtTime(start) + " --> " + formatSrtTime(end) + "\n" + text : null;
     }).filter(Boolean);
-    const blob = new Blob(["\\uFEFF" + entries.join("\\n\\n") + "\\n"], { type: "application/x-subrip;charset=utf-8" });
+    const blob = new Blob(["\uFEFF" + entries.join("\n\n") + "\n"], { type: "application/x-subrip;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
