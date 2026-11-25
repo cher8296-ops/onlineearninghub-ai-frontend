@@ -129,7 +129,7 @@ test("Video Studio opens from workspace navigation and exposes production planni
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: /Video Studio/ }).click();
   await expect(page.getByRole("heading", { name: "FlowChera21 Video Studio" })).toBeVisible();
-  await expect(page.getByText(/silent WebM videos for free in your browser/i)).toBeVisible();
+  await expect(page.getByText(/videos for free in your browser/i)).toBeVisible();
   await expect(page.getByLabel("Video topic")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Scene storyboard" })).toBeVisible();
 });
@@ -157,7 +157,7 @@ test("Video Studio supports Afaan Oromoo, English and Amharic in the standalone 
   await expect(page.getByLabel("Video topic")).toBeVisible();
 });
 
-test("Video Studio renders and downloads a real browser-recorded WebM file", async ({ page }) => {
+test("Video Studio renders and downloads a real browser-recorded video file", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: /Video Studio/ }).click();
   await expect(page.getByRole("heading", { name: "FlowChera21 Video Studio" })).toBeVisible();
