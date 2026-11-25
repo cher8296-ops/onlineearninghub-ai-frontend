@@ -142,3 +142,11 @@ test("Video Studio opens from workspace navigation and exposes production planni
   await expect(page.getByLabel("Video topic")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Scene storyboard" })).toBeVisible();
 });
+
+test("standalone Video Studio page loads independently with language controls", async ({ page }) => {
+  await page.goto("/studio/index.html", { waitUntil: "domcontentloaded" });
+  await expect(page).toHaveTitle(/FlowChera21 Video Studio/);
+  await expect(page.getByRole("heading", { name: "FlowChera21 Video Studio" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Main website/ })).toHaveAttribute("href", "https://www.flowchera21.bg5.net/");
+  await expect(page.getByLabel("Video language")).toBeVisible();
+});
