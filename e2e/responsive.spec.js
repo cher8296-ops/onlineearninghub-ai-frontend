@@ -129,7 +129,7 @@ test("Video Studio opens from workspace navigation and exposes production planni
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: /Video Studio/ }).click();
   await expect(page.getByRole("heading", { name: "FlowChera21 Video Studio" })).toBeVisible();
-  await expect(page.getByText(/AI voice recording, video rendering and automatic MP4 export are not enabled/i)).toBeVisible();
+  await expect(page.getByText(/silent WebM videos for free in your browser/i)).toBeVisible();
   await expect(page.getByLabel("Video topic")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Scene storyboard" })).toBeVisible();
 });
