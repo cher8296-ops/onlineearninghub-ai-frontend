@@ -238,7 +238,8 @@ def download_video_job(job_id: str):
     if not output_path or not Path(output_path).is_file():
         raise HTTPException(410, "The MP4 file is no longer available; submit the job again.")
     return FileResponse(output_path, media_type="video/mp4", filename="flowchera21-video.mp4")
-\n@app.get("/health")
+
+@app.get("/health")
 def health():
     return {"status":"healthy","renderer":"ffmpeg-h264-aac","max_duration_seconds":MAX_TOTAL_SECONDS,"languages":["om","en","am"]}
 
