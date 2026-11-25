@@ -10,7 +10,7 @@ const initialScenes = [
   { title: "Closing and call to action", seconds: 18, visual: "Recap, end card and next-step prompt", narration: "Summarize the key lesson and invite viewers to take one useful action." }
 ];
 
-export default function VideoStudio({ language = "en", onBack }) {
+export default function VideoStudio({ language = "en", onBack, standalone = false }) {
   const om = language === "om";
   const [title, setTitle] = useState("FlowChera21 — Your next big idea");
   const [topic, setTopic] = useState("");
@@ -69,7 +69,7 @@ export default function VideoStudio({ language = "en", onBack }) {
     const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href=url; a.download="flowchera21-video-production-brief.md"; a.click(); URL.revokeObjectURL(url);
   };
   return <section className="video-studio">
-    <div className="studio-hero"><div className="studio-orb"><Clapperboard size={28}/></div><div><span className="studio-kicker">{labels.eyebrow}</span><h1>{labels.heading}</h1><p>{labels.intro}</p></div></div>
+    <div className="studio-hero"><div className="studio-orb"><Clapperboard size={28}/></div><div><span className="studio-kicker">{labels.eyebrow}</span><h1>{labels.heading}</h1><p>{labels.intro}</p></div>{!standalone && <a className="studio-external-link" href="https://flowchera21-video-studio.onrender.com/" target="_blank" rel="noreferrer">Open standalone website ↗</a>}</div>
     <div className="studio-warning" role="note"><Film size={18}/><span>{labels.warning}</span></div>
     <div className="studio-grid">
       <section className="studio-card studio-settings">
