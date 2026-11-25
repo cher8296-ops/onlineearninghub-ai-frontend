@@ -26,9 +26,11 @@ export default function VideoStudio({ language = "en", onBack, standalone = fals
   const [voiceReady, setVoiceReady] = useState(false);
   const [voiceBusy, setVoiceBusy] = useState(false);
   const [audioUrl, setAudioUrl] = useState("");
+  const [rendering, setRendering] = useState(false);
+  const [renderProgress, setRenderProgress] = useState(0);
   const labels = om ? {
-    eyebrow:"CREATIVE PRODUCTION WORKSPACE", heading:"FlowChera21 Video Studio", intro:"Qabiyyee kee karoora, script fi scene production qindaa'aa ta'etti jijjiiri.", back:"Iddoo hojii AI", project:"Maqaa pirojektii", topic:"Mata-duree viidiyoo", lang:"Afaan viidiyoo", format:"Gosa viidiyoo", long:"Viidiyoo dheeraa", short:"YouTube Shorts", voice:"Gosa sagalee", tone:"Akkaataa", scenes:"Scene storyboard", add:"Scene dabali", generate:"Script AI qopheessi", generating:"Script qopheessaa jira…", script:"Script fi narration", save:"Karoora kuusi", export:"Production brief buusi", delete:"Haqi", duration:"Sekondii", visual:"Mul'ata / camera", narration:"Narration", saved:"Karoora browser kana keessatti kuufameera.", generated:"Script AI qopheesseera. Sirrii ta'uu isaa gulaali.", warning:"Studio kun amma script, storyboard fi production brief qopheessa. Sagalee AI, video rendering fi MP4 export automatic ta'uun hanga media-rendering backend walitti hidhamutti hin hojjetu.", failed:"Script AI hin milkoofne. Backend/quota sakatta'i; barruu harkaan gulaaluu dandeessa.", voiceGenerate:"Sagalee AI uumi",voiceGenerating:"Sagalee qopheessaa jira…",voiceEnabled:"Tajaajilli sagalee hojii irra jira",voiceDisabled:"Tajaajilli sagalee kaffaltii qabu hanga abbaa sirnichaa eeyyamutti cufameera",voiceGenerated:"Sagaleen uumameera. Maxxansuu dura dhaggeeffadhu; sagalee Afaan Oromoo mirkaneessi.",voiceTooLong:"Barruu sagalee kutaa 4,000 character gadiitti qoodi.",voiceFailure:"Sagalee uumuu hin dandeenye: ",voices:["Dubartii ga'eettii","Dhiira ga'eessa","Dargaggeessa","Jaarsa / dubartii jaartii","Sagalee daa'ima (gahee gabaabaa, nageenya qabu)"], tones:["Cinematic","Barnoota","Action / technology","Documentary","Professional"]} : {
-    eyebrow:"CREATIVE PRODUCTION WORKSPACE", heading:"FlowChera21 Video Studio", intro:"Turn your idea into a structured video plan, script and scene-by-scene production brief.", back:"AI workspace", project:"Project title", topic:"Video topic", lang:"Video language", format:"Video format", long:"Long-form video", short:"YouTube Shorts", voice:"Voice role", tone:"Creative direction", scenes:"Scene storyboard", add:"Add scene", generate:"Generate AI script", generating:"Writing your script…", script:"Script and narration", save:"Save project", export:"Export production brief", delete:"Remove", duration:"Seconds", visual:"Visual / camera", narration:"Narration", saved:"Project saved in this browser.", generated:"AI script generated. Review and edit it before production.", warning:"This studio currently creates scripts, storyboards and production briefs. AI voice recording, video rendering and automatic MP4 export are not enabled until a media-rendering backend is connected.", failed:"AI script generation failed. Check backend availability/quota; you can still edit the script manually.", voiceGenerate:"Generate AI narration",voiceGenerating:"Generating narration…",voiceEnabled:"Voice service is enabled",voiceDisabled:"Paid voice service is off until the site owner enables it",voiceGenerated:"Narration audio generated. Listen and review pronunciation before publishing.",voiceTooLong:"Split narration into sections of 4,000 characters or fewer.",voiceFailure:"Voice generation failed: ",voices:["Adult female","Adult male","Young adult","Older adult","Child voice (brief, age-appropriate role)"], tones:["Cinematic","Educational","Action / technology","Documentary","Professional"]};
+    eyebrow:"CREATIVE PRODUCTION WORKSPACE", heading:"FlowChera21 Video Studio", intro:"Qabiyyee kee karoora, script fi scene production qindaa'aa ta'etti jijjiiri.", back:"Iddoo hojii AI", project:"Maqaa pirojektii", topic:"Mata-duree viidiyoo", lang:"Afaan viidiyoo", format:"Gosa viidiyoo", long:"Viidiyoo dheeraa", short:"YouTube Shorts", voice:"Gosa sagalee", tone:"Akkaataa", scenes:"Scene storyboard", add:"Scene dabali", generate:"Script AI qopheessi", generating:"Script qopheessaa jira…", script:"Script fi narration", save:"Karoora kuusi", export:"Production brief buusi", delete:"Haqi", duration:"Sekondii", visual:"Mul'ata / camera", narration:"Narration", saved:"Karoora browser kana keessatti kuufameera.", generated:"Script AI qopheesseera. Sirrii ta'uu isaa gulaali.", warning:"Studio kun amma script, storyboard fi production brief qopheessa. Sagalee AI, video rendering fi MP4 export automatic ta'uun hanga media-rendering backend walitti hidhamutti hin hojjetu.", failed:"Script AI hin milkoofne. Backend/quota sakatta'i; barruu harkaan gulaaluu dandeessa.", voiceGenerate:"Sagalee AI uumi",voiceGenerating:"Sagalee qopheessaa jira…",voiceEnabled:"Tajaajilli sagalee hojii irra jira",voiceDisabled:"Tajaajilli sagalee kaffaltii qabu hanga abbaa sirnichaa eeyyamutti cufameera",voiceGenerated:"Sagaleen uumameera. Maxxansuu dura dhaggeeffadhu; sagalee Afaan Oromoo mirkaneessi.",voiceTooLong:"Barruu sagalee kutaa 4,000 character gadiitti qoodi.",voiceFailure:"Sagalee uumuu hin dandeenye: ",renderVideo:"Video bilisaa uumi (WebM)",renderingVideo:"Video qopheessaa jira…",renderDone:"Video WebM qophaa’eera; buufadhu.",renderUnsupported:"Browser kun video recording hin deeggaru. Chrome/Edge yaali.",renderLimit:"Video bilisaa yeroo daqiiqaa 10 ol qabu hin uumi; scene kee gabaabsi.",voices:["Dubartii ga'eettii","Dhiira ga'eessa","Dargaggeessa","Jaarsa / dubartii jaartii","Sagalee daa'ima (gahee gabaabaa, nageenya qabu)"], tones:["Cinematic","Barnoota","Action / technology","Documentary","Professional"]} : {
+    eyebrow:"CREATIVE PRODUCTION WORKSPACE", heading:"FlowChera21 Video Studio", intro:"Turn your idea into a structured video plan, script and scene-by-scene production brief.", back:"AI workspace", project:"Project title", topic:"Video topic", lang:"Video language", format:"Video format", long:"Long-form video", short:"YouTube Shorts", voice:"Voice role", tone:"Creative direction", scenes:"Scene storyboard", add:"Add scene", generate:"Generate AI script", generating:"Writing your script…", script:"Script and narration", save:"Save project", export:"Export production brief", delete:"Remove", duration:"Seconds", visual:"Visual / camera", narration:"Narration", saved:"Project saved in this browser.", generated:"AI script generated. Review and edit it before production.", warning:"This studio currently creates scripts, storyboards and production briefs. AI voice recording, video rendering and automatic MP4 export are not enabled until a media-rendering backend is connected.", failed:"AI script generation failed. Check backend availability/quota; you can still edit the script manually.", voiceGenerate:"Generate AI narration",voiceGenerating:"Generating narration…",voiceEnabled:"Voice service is enabled",voiceDisabled:"Paid voice service is off until the site owner enables it",voiceGenerated:"Narration audio generated. Listen and review pronunciation before publishing.",voiceTooLong:"Split narration into sections of 4,000 characters or fewer.",voiceFailure:"Voice generation failed: ",renderVideo:"Create free video (WebM)",renderingVideo:"Rendering video…",renderDone:"Your WebM video is ready to download.",renderUnsupported:"This browser does not support video recording. Try Chrome or Edge.",renderLimit:"The free browser renderer is limited to 10 minutes. Shorten the scenes.",voices:["Adult female","Adult male","Young adult","Older adult","Child voice (brief, age-appropriate role)"], tones:["Cinematic","Educational","Action / technology","Documentary","Professional"]};
   useEffect(() => {
     let active = true;
     fetch(API + "/video/capabilities")
@@ -104,6 +106,77 @@ export default function VideoStudio({ language = "en", onBack, standalone = fals
     } catch (error) { setNotice(labels.voiceFailure + (error.message || "network error")); }
     finally { setVoiceBusy(false); }
   };
+  const renderVideo = async () => {
+    if (rendering) return;
+    if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) {
+      setNotice(labels.renderUnsupported); return;
+    }
+    const duration = scenes.reduce((sum, scene) => sum + Math.max(1, Number(scene.seconds) || 1), 0);
+    if (duration > 600) { setNotice(labels.renderLimit); return; }
+    setRendering(true); setRenderProgress(0); setNotice("");
+    const canvas = document.createElement("canvas");
+    canvas.width = 1280; canvas.height = 720;
+    const ctx = canvas.getContext("2d");
+    const stream = canvas.captureStream(24);
+    const mimeType = ["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"].find(type => MediaRecorder.isTypeSupported(type));
+    if (!mimeType) { setRendering(false); setNotice(labels.renderUnsupported); return; }
+    const chunks = [];
+    const recorder = new MediaRecorder(stream, {mimeType, videoBitsPerSecond: 2500000});
+    const finished = new Promise((resolve, reject) => {
+      recorder.ondataavailable = event => { if (event.data?.size) chunks.push(event.data); };
+      recorder.onerror = () => reject(new Error("Browser video encoder failed."));
+      recorder.onstop = () => resolve(new Blob(chunks, {type:mimeType}));
+    });
+    const wrap = (text, maxWidth) => {
+      const words = String(text || "").split(/\\s+/); const lines=[]; let line="";
+      for (const word of words) { const next=line ? line+" "+word : word; if(ctx.measureText(next).width>maxWidth && line){lines.push(line);line=word;} else line=next; }
+      if(line) lines.push(line); return lines;
+    };
+    const drawText = (text,x,y,maxWidth,lineHeight,maxLines=3) => {
+      const lines=wrap(text,maxWidth).slice(0,maxLines);
+      lines.forEach((line,index)=>ctx.fillText(line,x,y+index*lineHeight));
+    };
+    const drawFrame = (scene,index,elapsed,sceneDuration) => {
+      const gradient=ctx.createLinearGradient(0,0,1280,720);
+      const palettes=[["#10172e","#273d63"],["#17202b","#285b62"],["#24172f","#59406b"],["#101e35","#34507b"]];
+      const colors=palettes[index%palettes.length]; gradient.addColorStop(0,colors[0]); gradient.addColorStop(1,colors[1]);
+      ctx.fillStyle=gradient; ctx.fillRect(0,0,1280,720);
+      const progress=Math.min(1,elapsed/Math.max(1,sceneDuration));
+      ctx.fillStyle="rgba(255,255,255,.07)"; ctx.beginPath(); ctx.arc(1080-progress*160,160,190,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle="#9fe7d3"; ctx.font="600 22px Arial"; ctx.fillText("FLOWCHERA21  /  VIDEO STUDIO",80,82);
+      ctx.fillStyle="#ffffff"; ctx.font="700 54px Arial"; drawText(title,80,190,1080,66,2);
+      ctx.fillStyle="#a9c5ff"; ctx.font="600 25px Arial"; ctx.fillText("SCENE "+String(index+1).padStart(2,"0")+"  ·  "+scene.title,80,330);
+      ctx.fillStyle="#ffffff"; ctx.font="400 32px Arial"; drawText(scene.visual,80,405,1080,44,3);
+      ctx.fillStyle="rgba(0,0,0,.34)"; ctx.fillRect(60,555,1160,112);
+      ctx.fillStyle="#ffffff"; ctx.font="400 25px Arial"; drawText(script.trim() || scene.narration,90,598,1100,34,2);
+      ctx.fillStyle="rgba(255,255,255,.25)"; ctx.fillRect(80,685,1120,5);
+      ctx.fillStyle="#9fe7d3"; ctx.fillRect(80,685,1120*progress,5);
+    };
+    try {
+      recorder.start(250);
+      const started=performance.now(); let elapsedTotal=0;
+      for(let i=0;i<scenes.length;i++){
+        const scene=scenes[i]; const seconds=Math.max(1,Number(scene.seconds)||1); const start=performance.now();
+        await new Promise(resolve=>{
+          const frame=now=>{
+            const elapsed=Math.min(seconds,(now-start)/1000);
+            drawFrame(scene,i,elapsed,seconds);
+            const done=elapsedTotal+elapsed; setRenderProgress(Math.min(99,Math.round(done/duration*100)));
+            if(elapsed<seconds) requestAnimationFrame(frame); else {elapsedTotal+=seconds;resolve();}
+          };
+          requestAnimationFrame(frame);
+        });
+      }
+      recorder.stop();
+      const blob=await finished;
+      if(!blob.size) throw new Error("The browser returned an empty video.");
+      const url=URL.createObjectURL(blob); const link=document.createElement("a");
+      link.href=url; link.download="flowchera21-"+Date.now()+".webm"; link.click();
+      setTimeout(()=>URL.revokeObjectURL(url),60000);
+      setRenderProgress(100); setNotice(labels.renderDone);
+    } catch(error) { try { if(recorder.state!=="inactive") recorder.stop(); } catch {} setNotice("Video rendering failed: "+(error.message||"unknown error")); }
+    finally { stream.getTracks().forEach(track=>track.stop()); setRendering(false); }
+  };
   const updateScene = (index, key, value) => setScenes(current => current.map((scene,i) => i === index ? {...scene,[key]:value} : scene));
   const exportBrief = () => {
     const content = ["# "+title, "", "Topic: "+topic, "Language: "+locale, "Format: "+format, "Voice role: "+voice, "Direction: "+tone, "Target duration: "+totalSeconds+" seconds", "", "## Script", script || "(Script not generated yet)", "", "## Storyboard", ...scenes.flatMap((s,i)=>["### Scene "+(i+1)+": "+s.title, "Duration: "+s.seconds+" seconds", "Visual: "+s.visual, "Narration: "+s.narration, ""]) , "## Production status", labels.warning].join("\n");
@@ -135,7 +208,7 @@ export default function VideoStudio({ language = "en", onBack, standalone = fals
           <div className="studio-two"><label>{labels.duration}<input type="number" min="1" max="3600" value={scene.seconds} onChange={e=>updateScene(index,"seconds",e.target.value)}/></label><label>{labels.visual}<input value={scene.visual} onChange={e=>updateScene(index,"visual",e.target.value)}/></label></div>
           <label>{labels.narration}<textarea rows={2} value={scene.narration} onChange={e=>updateScene(index,"narration",e.target.value)}/></label>
         </article>)}</div>
-        <button className="secondary-btn studio-add" onClick={()=>setScenes(current=>[...current,{title:"New scene",seconds:20,visual:"Describe the shot",narration:"Write the narration"}])}><Plus size={15}/>{labels.add}</button>
+        <div className="studio-render-tools"><button className="generate-btn" onClick={renderVideo} disabled={rendering || !scenes.length}><Film size={16}/>{rendering ? labels.renderingVideo+" "+renderProgress+"%" : labels.renderVideo}</button>{rendering && <progress max="100" value={renderProgress}/>}</div><button className="secondary-btn studio-add" onClick={()=>setScenes(current=>[...current,{title:"New scene",seconds:20,visual:"Describe the shot",narration:"Write the narration"}])}><Plus size={15}/>{labels.add}</button>
       </section>
     </div>
     <section className="studio-card studio-script"><div className="studio-section-head"><h2><Mic2 size={18}/> {labels.script}</h2><span>{locale.toUpperCase()} · {voice}</span></div><textarea value={script} onChange={e=>{setScript(e.target.value);setSaved(false);}} rows={14} placeholder={om ? "Script AI'n uumame asitti mul'ata; yookaan harkaan barreessi..." : "Your generated script appears here, or write your own..."}/><div className="studio-actions"><button className="generate-btn" onClick={exportBrief}><Download size={16}/>{labels.export}</button><button className="secondary-btn" onClick={save}>{labels.save}</button>{onBack && <button className="secondary-btn" onClick={onBack}><ArrowLeft size={15}/>{labels.back}</button>}</div></section>
