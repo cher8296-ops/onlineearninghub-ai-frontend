@@ -141,3 +141,17 @@ test("standalone Video Studio page loads independently with language controls", 
   await expect(page.getByRole("link", { name: /Main website/ })).toHaveAttribute("href", "https://www.flowchera21.bg5.net/");
   await expect(page.getByLabel("Video language")).toBeVisible();
 });
+
+
+test("Video Studio renders and downloads a real browser-recorded WebM file", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: /Video Studio/ }).click();
+  await expect(page.getByRole("heading", { name: "FlowChera21 Video Studio" })).toBeVisible();
+  const durations = page.locator(".scene-card input[type='number']");
+  const count = await durations.count();
+  for (let index = 0; index < count; index++) await durations.nth(index).fill("1");
+  const downloadPromise = page.waitForEvent("download", { timeout: 20000 });
+  await page.getByRole("button", { name: /Create free video \(WebM\)/ }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toMatch(/\\.webm$/i);
+});
