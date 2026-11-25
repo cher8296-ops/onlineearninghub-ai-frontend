@@ -14,7 +14,8 @@ export default function VideoStudio({ language = "en", onBack, standalone = fals
   const om = language === "om";
   const [title, setTitle] = useState("FlowChera21 — Your next big idea");
   const [topic, setTopic] = useState("");
-  const [locale, setLocale] = useState("om");
+  const [locale, setLocale] = useState(language);
+  useEffect(() => { setLocale(language); }, [language]);
   const [format, setFormat] = useState("long");
   const [voice, setVoice] = useState("adult-female");
   const [tone, setTone] = useState("cinematic");
