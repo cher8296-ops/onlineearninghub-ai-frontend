@@ -143,6 +143,20 @@ test("standalone Video Studio page loads independently with language controls", 
 });
 
 
+test("Video Studio supports Afaan Oromoo, English and Amharic in the standalone site", async ({ page }) => {
+  await page.goto("https://flowchera21-video-studio.onrender.com/", { waitUntil: "domcontentloaded" });
+  const interfaceLanguage = page.getByLabel("Interface language");
+  await interfaceLanguage.selectOption("am");
+  await expect(page.getByRole("heading", { name: "FlowChera21 ቪዲዮ ስቱዲዮ" })).toBeVisible();
+  await expect(page.getByLabel("የቪዲዮ ርዕስ")).toBeVisible();
+  await expect(page.getByLabel("የቪዲዮ ቋንቋ")).toHaveValue("am");
+  await interfaceLanguage.selectOption("om");
+  await expect(page.getByRole("heading", { name: "FlowChera21 Video Studio" })).toBeVisible();
+  await expect(page.getByLabel("Mata-duree viidiyoo")).toBeVisible();
+  await interfaceLanguage.selectOption("en");
+  await expect(page.getByLabel("Video topic")).toBeVisible();
+});
+
 test("Video Studio renders and downloads a real browser-recorded WebM file", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: /Video Studio/ }).click();
