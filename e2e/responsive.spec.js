@@ -168,7 +168,7 @@ test("Video Studio renders and downloads a real server MP4 file", async ({ page 
   const subtitleDownloadPromise = page.waitForEvent("download", { timeout: 10000 });
   await page.getByRole("button", { name: /Download subtitles/i }).click();
   const subtitleDownload = await subtitleDownloadPromise;
-  expect(subtitleDownload.suggestedFilename()).toMatch(/\\.srt$/i);
+  expect(subtitleDownload.suggestedFilename().toLowerCase().endsWith(".srt")).toBeTruthy();
   const downloadPromise = page.waitForEvent("download", { timeout: 120000 });
   await page.getByRole("button", { name: /Render MP4 video/i }).click();
   const download = await downloadPromise;
