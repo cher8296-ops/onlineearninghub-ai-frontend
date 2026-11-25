@@ -23,9 +23,21 @@ export default function VideoStudio({ language = "en", onBack, standalone = fals
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [saved, setSaved] = useState(false);
+  const [voiceReady, setVoiceReady] = useState(false);
+  const [voiceBusy, setVoiceBusy] = useState(false);
+  const [audioUrl, setAudioUrl] = useState("");
   const labels = om ? {
     eyebrow:"CREATIVE PRODUCTION WORKSPACE", heading:"FlowChera21 Video Studio", intro:"Qabiyyee kee karoora, script fi scene production qindaa'aa ta'etti jijjiiri.", back:"Iddoo hojii AI", project:"Maqaa pirojektii", topic:"Mata-duree viidiyoo", lang:"Afaan viidiyoo", format:"Gosa viidiyoo", long:"Viidiyoo dheeraa", short:"YouTube Shorts", voice:"Gosa sagalee", tone:"Akkaataa", scenes:"Scene storyboard", add:"Scene dabali", generate:"Script AI qopheessi", generating:"Script qopheessaa jira…", script:"Script fi narration", save:"Karoora kuusi", export:"Production brief buusi", delete:"Haqi", duration:"Sekondii", visual:"Mul'ata / camera", narration:"Narration", saved:"Karoora browser kana keessatti kuufameera.", generated:"Script AI qopheesseera. Sirrii ta'uu isaa gulaali.", warning:"Studio kun amma script, storyboard fi production brief qopheessa. Sagalee AI, video rendering fi MP4 export automatic ta'uun hanga media-rendering backend walitti hidhamutti hin hojjetu.", failed:"Script AI hin milkoofne. Backend/quota sakatta'i; barruu harkaan gulaaluu dandeessa.", voices:["Dubartii ga'eettii","Dhiira ga'eessa","Dargaggeessa","Jaarsa / dubartii jaartii","Sagalee daa'ima (gahee gabaabaa, nageenya qabu)"], tones:["Cinematic","Barnoota","Action / technology","Documentary","Professional"]} : {
     eyebrow:"CREATIVE PRODUCTION WORKSPACE", heading:"FlowChera21 Video Studio", intro:"Turn your idea into a structured video plan, script and scene-by-scene production brief.", back:"AI workspace", project:"Project title", topic:"Video topic", lang:"Video language", format:"Video format", long:"Long-form video", short:"YouTube Shorts", voice:"Voice role", tone:"Creative direction", scenes:"Scene storyboard", add:"Add scene", generate:"Generate AI script", generating:"Writing your script…", script:"Script and narration", save:"Save project", export:"Export production brief", delete:"Remove", duration:"Seconds", visual:"Visual / camera", narration:"Narration", saved:"Project saved in this browser.", generated:"AI script generated. Review and edit it before production.", warning:"This studio currently creates scripts, storyboards and production briefs. AI voice recording, video rendering and automatic MP4 export are not enabled until a media-rendering backend is connected.", failed:"AI script generation failed. Check backend availability/quota; you can still edit the script manually.", voices:["Adult female","Adult male","Young adult","Older adult","Child voice (brief, age-appropriate role)"], tones:["Cinematic","Educational","Action / technology","Documentary","Professional"]};
+  useEffect(() => {
+    let active = true;
+    fetch(API + "/video/capabilities")
+      .then(response => response.ok ? response.json() : null)
+      .then(data => { if (active) setVoiceReady(Boolean(data?.voice_generation)); })
+      .catch(() => { if (active) setVoiceReady(false); });
+    return () => { active = false; };
+  }, []);
+  useEffect(() => () => { if (audioUrl) URL.revokeObjectURL(audioUrl); }, [audioUrl]);
   const totalSeconds = useMemo(() => scenes.reduce((sum, scene) => sum + Math.max(0, Number(scene.seconds) || 0), 0), [scenes]);
   useEffect(() => {
     try {
@@ -62,6 +74,36 @@ export default function VideoStudio({ language = "en", onBack, standalone = fals
     } catch (error) { setNotice(labels.failed + " (" + (error.message || "network error") + ")"); }
     finally { setBusy(false); }
   };
+  const generateVoice = async () => {
+    const narration = (script.trim() || scenes.map((scene, index) => `Scene ${index + 1}. ${scene.narration}`).join("\\n\\n")).trim();
+    if (!narration || voiceBusy) return;
+    if (voice === "child-role") {
+      setNotice("Child voice role is a storyboard-only choice. Select an adult narrator for generated audio.");
+      return;
+    }
+    if (narration.length > 4000) {
+      setNotice("For safety and predictable API costs, split narration into sections of 4,000 characters or fewer.");
+      return;
+    }
+    setVoiceBusy(true); setNotice("");
+    try {
+      const response = await fetch(API + "/video/voice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: narration, language: locale, voice_role: voice }),
+        signal: AbortSignal.timeout(100000)
+      });
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.detail || "Voice generation is unavailable.");
+      }
+      const blob = await response.blob();
+      if (!blob.size || !blob.type.includes("audio")) throw new Error("The voice service returned an invalid audio file.");
+      setAudioUrl(current => { if (current) URL.revokeObjectURL(current); return URL.createObjectURL(blob); });
+      setNotice("Narration audio generated. Listen and review pronunciation before publishing.");
+    } catch (error) { setNotice("Voice generation failed: " + (error.message || "network error")); }
+    finally { setVoiceBusy(false); }
+  };
   const updateScene = (index, key, value) => setScenes(current => current.map((scene,i) => i === index ? {...scene,[key]:value} : scene));
   const exportBrief = () => {
     const content = ["# "+title, "", "Topic: "+topic, "Language: "+locale, "Format: "+format, "Voice role: "+voice, "Direction: "+tone, "Target duration: "+totalSeconds+" seconds", "", "## Script", script || "(Script not generated yet)", "", "## Storyboard", ...scenes.flatMap((s,i)=>["### Scene "+(i+1)+": "+s.title, "Duration: "+s.seconds+" seconds", "Visual: "+s.visual, "Narration: "+s.narration, ""]) , "## Production status", labels.warning].join("\n");
@@ -82,7 +124,7 @@ export default function VideoStudio({ language = "en", onBack, standalone = fals
         </div>
         <label>{labels.voice}<select value={voice} onChange={e=>setVoice(e.target.value)}>{labels.voices.map((v,i)=><option key={i} value={["adult-female","adult-male","young-adult","older-adult","child-role"][i]}>{v}</option>)}</select></label>
         <label>{labels.tone}<select value={tone} onChange={e=>setTone(e.target.value)}>{labels.tones.map((v,i)=><option key={i} value={["cinematic","educational","action-technology","documentary","professional"][i]}>{v}</option>)}</select></label>
-        <div className="studio-actions"><button className="generate-btn" disabled={busy || !topic.trim()} onClick={generate}><Sparkles size={16}/>{busy ? labels.generating : labels.generate}</button><button className="secondary-btn" onClick={save}>{labels.save}</button></div>
+        <div className="studio-actions"><button className="generate-btn" disabled={busy || !topic.trim()} onClick={generate}><Sparkles size={16}/>{busy ? labels.generating : labels.generate}</button><button className="secondary-btn" onClick={save}>{labels.save}</button></div>\n        <div className="studio-voice-tools"><button className="secondary-btn" disabled={!voiceReady || voiceBusy || !((script.trim()) || scenes.some(scene => scene.narration.trim())) || voice === "child-role"} onClick={generateVoice}><Mic2 size={16}/>{voiceBusy ? "Generating audio…" : "Generate narration audio"}</button><span>{voiceReady ? "Voice API enabled" : "Voice API disabled until the owner enables paid TTS"}</span></div>\n        {audioUrl && <div className="studio-audio-preview"><audio controls src={audioUrl}/><a href={audioUrl} download="flowchera21-narration.mp3">Download MP3</a></div>}
         {notice && <p className="studio-notice" role="status">{notice}</p>}
       </section>
       <section className="studio-card">
