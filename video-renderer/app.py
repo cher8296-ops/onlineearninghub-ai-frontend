@@ -8,7 +8,7 @@ from pathlib import Path
 import imageio_ffmpeg
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import Response
 from PIL import Image, ImageDraw, ImageFont
 
 app = FastAPI(title="FlowChera21 Video Renderer", version="1.0.0")
@@ -145,7 +145,18 @@ async def render(project: str = Form(...), audio: UploadFile | None = File(defau
                 run_ffmpeg(["-i",str(silent),"-i",str(audio_path),"-map","0:v:0","-map","1:a:0","-c:v","copy","-c:a","aac","-b:a","128k","-af","apad","-t",str(total),"-movflags","+faststart",str(output)])
             else:
                 run_ffmpeg(["-i",str(silent),"-f","lavfi","-i","anullsrc=channel_layout=stereo:sample_rate=44100","-map","0:v:0","-map","1:a:0","-c:v","copy","-c:a","aac","-shortest","-movflags","+faststart",str(output)])
-            return FileResponse(str(output), media_type="video/mp4", filename="flowchera21-video.mp4", background=None)
+            video_bytes = output.read_bytes()
+            if len(video_bytes) < 1024:
+                raise RuntimeError("Rendered MP4 is unexpectedly small.")
+            return Response(
+                content=video_bytes,
+                media_type="video/mp4",
+                headers={
+                    "Content-Disposition": 'attachment; filename="flowchera21-video.mp4"',
+                    "X-Video-Duration": str(total),
+                    "X-Video-Format": "mp4",
+                },
+            )
     except HTTPException:
         raise
     except subprocess.TimeoutExpired:
