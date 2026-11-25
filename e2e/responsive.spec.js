@@ -135,7 +135,7 @@ test("Video Studio opens from workspace navigation and exposes production planni
 });
 
 test("standalone Video Studio page loads independently with language controls", async ({ page }) => {
-  await page.goto("/studio/index.html", { waitUntil: "domcontentloaded" });
+  await page.goto("https://flowchera21-video-studio.onrender.com/", { waitUntil: "domcontentloaded" });
   await expect(page).toHaveTitle(/FlowChera21 Video Studio/);
   await expect(page.getByRole("heading", { name: "FlowChera21 Video Studio" })).toBeVisible();
   await expect(page.getByRole("link", { name: /Main website/ })).toHaveAttribute("href", "https://www.flowchera21.bg5.net/");
