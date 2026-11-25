@@ -169,7 +169,7 @@ test("Video Studio renders and downloads a real browser-recorded video file", as
   const subtitleDownload = await subtitleDownloadPromise;
   expect(subtitleDownload.suggestedFilename()).toMatch(/\\.srt$/i);
   const downloadPromise = page.waitForEvent("download", { timeout: 20000 });
-  await page.getByRole("button", { name: /Create short video/i }).click();
+  await page.getByRole("button", { name: /Render MP4 video/i }).click();
   const download = await downloadPromise;
-  expect(download.suggestedFilename()).toMatch(/\.webm$/i);
+  expect(download.suggestedFilename()).toMatch(/\.mp4$/i);
 });
