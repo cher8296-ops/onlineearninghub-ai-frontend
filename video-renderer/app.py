@@ -110,6 +110,7 @@ JOB_ROOT = Path(tempfile.gettempdir()) / "flowchera21-jobs"
 JOB_ROOT.mkdir(parents=True, exist_ok=True)
 JOBS = {}
 JOBS_LOCK = threading.Lock()
+JOB_SEMAPHORE = threading.Semaphore(1)
 
 
 def _job_update(job_id, **fields):
@@ -118,7 +119,7 @@ def _job_update(job_id, **fields):
             JOBS[job_id].update(fields)
 
 
-def _render_job(job_id, data, audio_payload, audio_name):
+def _render_job_now(job_id, data, audio_payload, audio_name):
     job_dir = JOB_ROOT / job_id
     job_dir.mkdir(parents=True, exist_ok=True)
     try:
@@ -176,6 +177,12 @@ def _render_job(job_id, data, audio_payload, audio_name):
                     finished_at=time.time())
 
 
+def _render_job(job_id, data, audio_payload, audio_name):
+    # One FFmpeg render at a time on the single free instance; additional jobs wait.
+    with JOB_SEMAPHORE:
+        _render_job_now(job_id, data, audio_payload, audio_name)
+
+
 @app.post("/jobs", status_code=202)
 async def create_video_job(background_tasks: BackgroundTasks, project: str = Form(...),
                            audio: UploadFile | None = File(default=None)):
@@ -205,11 +212,12 @@ async def create_video_job(background_tasks: BackgroundTasks, project: str = For
             raise HTTPException(413, f"Audio file must be {MAX_AUDIO_BYTES//(1024*1024)} MB or smaller.")
         audio_name = audio.filename
     with JOBS_LOCK:
-        active = [j for j in JOBS.values() if j.get("status") in {"queued","running"}]
-        if active:
-            raise HTTPException(429, "The free single-instance renderer is already processing a job. Try again when it finishes.")
         job_id = uuid.uuid4().hex
+        queued_count = sum(1 for j in JOBS.values() if j.get("status") in {"queued","running"})
+        if queued_count >= 5:
+            raise HTTPException(429, "The free renderer queue is full. Wait for a queued job to finish.")
         JOBS[job_id] = {"job_id":job_id,"status":"queued","stage":"queued","progress":0,
+                        "queue_position":queued_count+1,
                         "total_seconds":total,"total_scenes":len(scenes),"completed_scenes":0,
                         "created_at":time.time(),"message":"Job queued"}
     background_tasks.add_task(_render_job, job_id, data, audio_payload, audio_name)
