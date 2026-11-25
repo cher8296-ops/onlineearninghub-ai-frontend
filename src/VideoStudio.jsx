@@ -142,7 +142,8 @@ export default function VideoStudio({ language = "en", onBack, standalone = fals
     const drawFrame = (scene,index,elapsed,sceneDuration) => {
       const gradient=ctx.createLinearGradient(0,0,1280,720);
       const palettes=[["#10172e","#273d63"],["#17202b","#285b62"],["#24172f","#59406b"],["#101e35","#34507b"]];
-      const tonePalettes={cinematic:["#10172e","#273d63"],educational:["#123b35","#287a69"],"action-technology":["#24132f","#a13c4d"],documentary:["#29291f","#6c6548"],professional:["#102b46","#28749a"]};\n      const colors=tonePalettes[tone] || palettes[index%palettes.length]; gradient.addColorStop(0,colors[0]); gradient.addColorStop(1,colors[1]);
+      const tonePalettes={cinematic:["#10172e","#273d63"],educational:["#123b35","#287a69"],"action-technology":["#24132f","#a13c4d"],documentary:["#29291f","#6c6548"],professional:["#102b46","#28749a"]};
+      const colors=tonePalettes[tone] || palettes[index%palettes.length]; gradient.addColorStop(0,colors[0]); gradient.addColorStop(1,colors[1]);
       ctx.fillStyle=gradient; ctx.fillRect(0,0,1280,720);
       const progress=Math.min(1,elapsed/Math.max(1,sceneDuration));
       ctx.fillStyle="rgba(255,255,255,.07)"; ctx.beginPath(); ctx.arc(1080-progress*160,160,190,0,Math.PI*2); ctx.fill();
@@ -174,7 +175,8 @@ export default function VideoStudio({ language = "en", onBack, standalone = fals
       const blob=await finished;
       if(!blob.size) throw new Error("The browser returned an empty video.");
       const url=URL.createObjectURL(blob); const link=document.createElement("a");
-      link.href=url; const isMp4 = mimeType.startsWith("video/mp4");\n      link.download="flowchera21-"+Date.now()+(isMp4?".mp4":".webm"); link.click();
+      link.href=url; const isMp4 = mimeType.startsWith("video/mp4");
+      link.download="flowchera21-"+Date.now()+(isMp4?".mp4":".webm"); link.click();
       setTimeout(()=>URL.revokeObjectURL(url),60000);
       setRenderProgress(100); setNotice(labels.renderDone + (isMp4 ? " (MP4)" : " (WebM — this browser does not expose MP4 encoding)"));
     } catch(error) { try { if(recorder.state!=="inactive") recorder.stop(); } catch {} setNotice("Video rendering failed: "+(error.message||"unknown error")); }
