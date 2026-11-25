@@ -27,13 +27,14 @@ export default function VideoStudio({ language = "en", onBack, standalone = fals
   const [voiceReady, setVoiceReady] = useState(false);
   const [voiceBusy, setVoiceBusy] = useState(false);
   const [audioUrl, setAudioUrl] = useState("");
+  const [audioFile, setAudioFile] = useState(null);
   const [rendering, setRendering] = useState(false);
   const [renderProgress, setRenderProgress] = useState(0);
   const labels = locale === "om" ? {
-    eyebrow:"CREATIVE PRODUCTION WORKSPACE", heading:"FlowChera21 Video Studio", intro:"Qabiyyee kee karoora, script fi scene production qindaa'aa ta'etti jijjiiri.", back:"Iddoo hojii AI", project:"Maqaa pirojektii", topic:"Mata-duree viidiyoo", lang:"Afaan viidiyoo", format:"Gosa viidiyoo", long:"Viidiyoo dheeraa", short:"YouTube Shorts", voice:"Gosa sagalee", tone:"Akkaataa", scenes:"Scene storyboard", add:"Scene dabali", generate:"Script AI qopheessi", generating:"Script qopheessaa jira…", script:"Script fi narration", save:"Karoora kuusi", export:"Production brief buusi", delete:"Haqi", duration:"Sekondii", visual:"Mul'ata / camera", narration:"Narration", saved:"Karoora browser kana keessatti kuufameera.", generated:"Script AI qopheesseera. Sirrii ta'uu isaa gulaali.", warning:"Studio kun storyboard, subtitle fi motion-graphic video gabaabaa browser keessatti uuma. Sagalee irratti dabaluuf MP3/WAV galchi. MP4 browser deeggaru qofa; video daqiiqaa 20–60 server rendering pipeline barbaada; amma hin hojjetu.", failed:"Script AI hin milkoofne. Backend/quota sakatta'i; barruu harkaan gulaaluu dandeessa.", voiceGenerate:"Sagalee browser irraa preview godhi",voiceGenerating:"Sagalee qopheessaa jira…",voiceEnabled:"Sagalee bilisaa browser fayyadama; afaan irratti hundaa’a",voiceDisabled:"Sagalee bilisaa browser fayyadama; afaan irratti hundaa’a",voiceGenerated:"Kun playback preview qofa; faayila sagalee hin uumu. Sagalee video irratti dabaluuf MP3/WAV galchi.",voiceTooLong:"Barruu sagalee kutaa 4,000 character gadiitti qoodi.",voiceFailure:"Sagalee uumuu hin dandeenye: ",renderVideo:"Video gabaabaa uumi (MP4 yoo deeggarame; yoo hin taane WebM)",renderingVideo:"Video qopheessaa jira…",renderDone:"Video qophaa’eera; buufadhu.",renderUnsupported:"Browser kun video recording hin deeggaru. Chrome/Edge yaali.",renderLimit:"Video bilisaa yeroo daqiiqaa 10 ol qabu hin uumi; scene kee gabaabsi.",voices:["Dubartii ga'eettii","Dhiira ga'eessa","Dargaggeessa","Jaarsa / dubartii jaartii","Sagalee daa'ima (gahee gabaabaa, nageenya qabu)"], tones:["Cinematic","Barnoota","Action / technology","Documentary","Professional"]} : locale === "am" ? {
-    eyebrow:"የፈጠራ ሥራ ቦታ", heading:"FlowChera21 ቪዲዮ ስቱዲዮ", intro:"ሀሳብዎን ወደ የተደራጀ የቪዲዮ እቅድ፣ ስክሪፕት እና የትዕይንት ዝርዝር ይቀይሩ።", back:"AI የሥራ ቦታ", project:"የፕሮጀክት ርዕስ", topic:"የቪዲዮ ርዕስ", lang:"የቪዲዮ ቋንቋ", format:"የቪዲዮ አይነት", long:"ረጅም ቪዲዮ", short:"YouTube Shorts", voice:"የድምፅ አይነት", tone:"የፈጠራ አቀራረብ", scenes:"የትዕይንት እቅድ", add:"ትዕይንት ጨምር", generate:"AI ስክሪፕት ፍጠር", generating:"ስክሪፕት በመዘጋጀት ላይ…", script:"ስክሪፕት እና ትረካ", save:"ፕሮጀክት አስቀምጥ", export:"የምርት እቅድ አውርድ", delete:"አስወግድ", duration:"ሰከንዶች", visual:"ምስል / ካሜራ", narration:"ትረካ", saved:"ፕሮጀክቱ በዚህ ብራውዘር ውስጥ ተቀምጧል።", generated:"AI ስክሪፕት አዘጋጅቷል። ከማምረት በፊት ይከልሱት።", warning:"ይህ ስቱዲዮ የትዕይንት እቅድ፣ ንዑስ ጽሑፍ እና አጭር አኒሜሽን ቪዲዮ በብራውዘር ያዘጋጃል። MP3/WAV ይጫኑ። MP4 በብራውዘር ድጋፍ ላይ ይመረኮዛል፤ 20–60 ደቂቃ ቪዲዮ የሰርቨር ማቀናበሪያ ይፈልጋል፣ አሁን ገና አልተዘረጋም።", failed:"AI ስክሪፕት ማዘጋጀት አልተሳካም። የአገልግሎቱን ሁኔታ ይፈትሹ።", voiceGenerate:"የአሳሽ ድምፅ ቅድመ እይታ",voiceGenerating:"ድምፅ በመዘጋጀት ላይ…",voiceEnabled:"ነፃ የአሳሽ ድምፅ ይጠቀማል፤ ቋንቋው በመሣሪያዎ ይወሰናል",voiceDisabled:"ነፃ የአሳሽ ድምፅ ይጠቀማል፤ ቋንቋው በመሣሪያዎ ይወሰናል",voiceGenerated:"ይህ የድምፅ ቅድመ እይታ ብቻ ነው፤ የድምፅ ፋይል አይፈጥርም። ድምፅ ለመጨመር MP3/WAV ይጫኑ።",voiceTooLong:"ጽሑፉን ከ4,000 ቁምፊዎች በታች በክፍል ይከፋፍሉ።",voiceFailure:"ድምፅ ማመንጨት አልተሳካም፦ ",renderVideo:"አጭር ቪዲዮ ፍጠር (MP4 ከተደገፈ፤ ካልሆነ WebM)",renderingVideo:"ቪዲዮ በመዘጋጀት ላይ…",renderDone:"ቪዲዮዎ ዝግጁ ነው።",renderUnsupported:"ይህ ብራውዘር የቪዲዮ ቀረጻን አይደግፍም። Chrome ወይም Edge ይሞክሩ።",renderLimit:"ነፃ የብራውዘር ማቀናበሪያው እስከ10 ደቂቃ ይደግፋል።",voices:["የጎልማሳ ሴት","የጎልማሳ ወንድ","ወጣት","አዛውንት","የሕፃን ድምፅ (አጭር እና ተስማሚ ሚና)"], tones:["ሲኒማዊ","ትምህርታዊ","አክሽን / ቴክኖሎጂ","ዘጋቢ ፊልም","ሙያዊ"]
+    eyebrow:"CREATIVE PRODUCTION WORKSPACE", heading:"FlowChera21 Video Studio", intro:"Qabiyyee kee karoora, script fi scene production qindaa'aa ta'etti jijjiiri.", back:"Iddoo hojii AI", project:"Maqaa pirojektii", topic:"Mata-duree viidiyoo", lang:"Afaan viidiyoo", format:"Gosa viidiyoo", long:"Viidiyoo dheeraa", short:"YouTube Shorts", voice:"Gosa sagalee", tone:"Akkaataa", scenes:"Scene storyboard", add:"Scene dabali", generate:"Script AI qopheessi", generating:"Script qopheessaa jira…", script:"Script fi narration", save:"Karoora kuusi", export:"Production brief buusi", delete:"Haqi", duration:"Sekondii", visual:"Mul'ata / camera", narration:"Narration", saved:"Karoora browser kana keessatti kuufameera.", generated:"Script AI qopheesseera. Sirrii ta'uu isaa gulaali.", warning:"Studio kun MP4 server renderer irratti uuma: scene, animation, subtitle fi sagalee MP3/WAV olkaa’ame. TTS Afaanota sadiif amma hin mirkanoofne; renderer bilisaa yeroo ammaa daqiiqaa 5 irratti daangeffameera.", failed:"Script AI hin milkoofne. Backend/quota sakatta'i; barruu harkaan gulaaluu dandeessa.", voiceGenerate:"Sagalee browser irraa preview godhi",voiceGenerating:"Sagalee qopheessaa jira…",voiceEnabled:"Sagalee bilisaa browser fayyadama; afaan irratti hundaa’a",voiceDisabled:"Sagalee bilisaa browser fayyadama; afaan irratti hundaa’a",voiceGenerated:"Kun playback preview qofa; faayila sagalee hin uumu. Sagalee video irratti dabaluuf MP3/WAV galchi.",voiceTooLong:"Barruu sagalee kutaa 4,000 character gadiitti qoodi.",voiceFailure:"Sagalee uumuu hin dandeenye: ",renderVideo:"MP4 video oomishi",renderingVideo:"Video qopheessaa jira…",renderDone:"Video qophaa’eera; buufadhu.",renderUnsupported:"Browser kun video recording hin deeggaru. Chrome/Edge yaali.",renderLimit:"Video bilisaa yeroo daqiiqaa 10 ol qabu hin uumi; scene kee gabaabsi.",voices:["Dubartii ga'eettii","Dhiira ga'eessa","Dargaggeessa","Jaarsa / dubartii jaartii","Sagalee daa'ima (gahee gabaabaa, nageenya qabu)"], tones:["Cinematic","Barnoota","Action / technology","Documentary","Professional"]} : locale === "am" ? {
+    eyebrow:"የፈጠራ ሥራ ቦታ", heading:"FlowChera21 ቪዲዮ ስቱዲዮ", intro:"ሀሳብዎን ወደ የተደራጀ የቪዲዮ እቅድ፣ ስክሪፕት እና የትዕይንት ዝርዝር ይቀይሩ።", back:"AI የሥራ ቦታ", project:"የፕሮጀክት ርዕስ", topic:"የቪዲዮ ርዕስ", lang:"የቪዲዮ ቋንቋ", format:"የቪዲዮ አይነት", long:"ረጅም ቪዲዮ", short:"YouTube Shorts", voice:"የድምፅ አይነት", tone:"የፈጠራ አቀራረብ", scenes:"የትዕይንት እቅድ", add:"ትዕይንት ጨምር", generate:"AI ስክሪፕት ፍጠር", generating:"ስክሪፕት በመዘጋጀት ላይ…", script:"ስክሪፕት እና ትረካ", save:"ፕሮጀክት አስቀምጥ", export:"የምርት እቅድ አውርድ", delete:"አስወግድ", duration:"ሰከንዶች", visual:"ምስል / ካሜራ", narration:"ትረካ", saved:"ፕሮጀክቱ በዚህ ብራውዘር ውስጥ ተቀምጧል።", generated:"AI ስክሪፕት አዘጋጅቷል። ከማምረት በፊት ይከልሱት።", warning:"ይህ ስቱዲዮ በሰርቨር MP4፣ ትዕይንት፣ አኒሜሽን፣ ንዑስ ጽሑፍ እና MP3/WAV ድምፅ ያዘጋጃል። የAI ድምፅ ለሶስቱ ቋንቋዎች ገና አልተረጋገጠም፤ ነፃው ሰርቨር አሁን እስከ5 ደቂቃ ይደግፋል።", failed:"AI ስክሪፕት ማዘጋጀት አልተሳካም። የአገልግሎቱን ሁኔታ ይፈትሹ።", voiceGenerate:"የአሳሽ ድምፅ ቅድመ እይታ",voiceGenerating:"ድምፅ በመዘጋጀት ላይ…",voiceEnabled:"ነፃ የአሳሽ ድምፅ ይጠቀማል፤ ቋንቋው በመሣሪያዎ ይወሰናል",voiceDisabled:"ነፃ የአሳሽ ድምፅ ይጠቀማል፤ ቋንቋው በመሣሪያዎ ይወሰናል",voiceGenerated:"ይህ የድምፅ ቅድመ እይታ ብቻ ነው፤ የድምፅ ፋይል አይፈጥርም። ድምፅ ለመጨመር MP3/WAV ይጫኑ።",voiceTooLong:"ጽሑፉን ከ4,000 ቁምፊዎች በታች በክፍል ይከፋፍሉ።",voiceFailure:"ድምፅ ማመንጨት አልተሳካም፦ ",renderVideo:"MP4 ቪዲዮ ፍጠር",renderingVideo:"ቪዲዮ በመዘጋጀት ላይ…",renderDone:"ቪዲዮዎ ዝግጁ ነው።",renderUnsupported:"ይህ ብራውዘር የቪዲዮ ቀረጻን አይደግፍም። Chrome ወይም Edge ይሞክሩ።",renderLimit:"ነፃ የብራውዘር ማቀናበሪያው እስከ10 ደቂቃ ይደግፋል።",voices:["የጎልማሳ ሴት","የጎልማሳ ወንድ","ወጣት","አዛውንት","የሕፃን ድምፅ (አጭር እና ተስማሚ ሚና)"], tones:["ሲኒማዊ","ትምህርታዊ","አክሽን / ቴክኖሎጂ","ዘጋቢ ፊልም","ሙያዊ"]
   } : {
-    eyebrow:"CREATIVE PRODUCTION WORKSPACE", heading:"FlowChera21 Video Studio", intro:"Turn your idea into a structured video plan, script and scene-by-scene production brief.", back:"AI workspace", project:"Project title", topic:"Video topic", lang:"Video language", format:"Video format", long:"Long-form video", short:"YouTube Shorts", voice:"Voice role", tone:"Creative direction", scenes:"Scene storyboard", add:"Add scene", generate:"Generate AI script", generating:"Writing your script…", script:"Script and narration", save:"Save project", export:"Export production brief", delete:"Remove", duration:"Seconds", visual:"Visual / camera", narration:"Narration", saved:"Project saved in this browser.", generated:"AI script generated. Review and edit it before production.", warning:"This studio creates storyboards, subtitle files and short motion-graphic videos in your browser. Upload MP3/WAV to add sound. MP4 is available only when your browser supports it; 20–60 minute videos require a server rendering pipeline that is not deployed yet.", failed:"AI script generation failed. Check backend availability/quota; you can still edit the script manually.", voiceGenerate:"Play browser narration preview",voiceGenerating:"Preparing narration…",voiceEnabled:"Uses free voices installed in your browser; language support depends on your device",voiceDisabled:"Uses free voices installed in your browser; language support depends on your device",voiceGenerated:"This is browser playback only; it does not create an audio file. Upload an MP3/WAV file to add narration to the video.",voiceTooLong:"Split narration into sections of 4,000 characters or fewer.",voiceFailure:"Voice generation failed: ",renderVideo:"Create short video (MP4 if supported, otherwise WebM)",renderingVideo:"Rendering video…",renderDone:"Your video is ready to download.",renderUnsupported:"This browser does not support video recording. Try Chrome or Edge.",renderLimit:"The free browser renderer is limited to 10 minutes. Shorten the scenes.",voices:["Adult female","Adult male","Young adult","Older adult","Child voice (brief, age-appropriate role)"], tones:["Cinematic","Educational","Action / technology","Documentary","Professional"]};
+    eyebrow:"CREATIVE PRODUCTION WORKSPACE", heading:"FlowChera21 Video Studio", intro:"Turn your idea into a structured video plan, script and scene-by-scene production brief.", back:"AI workspace", project:"Project title", topic:"Video topic", lang:"Video language", format:"Video format", long:"Long-form video", short:"YouTube Shorts", voice:"Voice role", tone:"Creative direction", scenes:"Scene storyboard", add:"Add scene", generate:"Generate AI script", generating:"Writing your script…", script:"Script and narration", save:"Save project", export:"Export production brief", delete:"Remove", duration:"Seconds", visual:"Visual / camera", narration:"Narration", saved:"Project saved in this browser.", generated:"AI script generated. Review and edit it before production.", warning:"Create MP4 on the server with animated scenes, burned-in subtitles and uploaded MP3/WAV narration. AI speech for all three languages is not verified yet; the current free renderer is limited to 5 minutes per video.", failed:"AI script generation failed. Check backend availability/quota; you can still edit the script manually.", voiceGenerate:"Play browser narration preview",voiceGenerating:"Preparing narration…",voiceEnabled:"Uses free voices installed in your browser; language support depends on your device",voiceDisabled:"Uses free voices installed in your browser; language support depends on your device",voiceGenerated:"This is browser playback only; it does not create an audio file. Upload an MP3/WAV file to add narration to the video.",voiceTooLong:"Split narration into sections of 4,000 characters or fewer.",voiceFailure:"Voice generation failed: ",renderVideo:"Render MP4 video",renderingVideo:"Rendering video…",renderDone:"Your video is ready to download.",renderUnsupported:"This browser does not support video recording. Try Chrome or Edge.",renderLimit:"The free server renderer is currently limited to 5 minutes. Shorten the scenes.",voices:["Adult female","Adult male","Young adult","Older adult","Child voice (brief, age-appropriate role)"], tones:["Cinematic","Educational","Action / technology","Documentary","Professional"]};
   useEffect(() => {
     setVoiceReady(typeof window !== "undefined" && "speechSynthesis" in window && "SpeechSynthesisUtterance" in window);
   }, []);
@@ -102,104 +103,31 @@ export default function VideoStudio({ language = "en", onBack, standalone = fals
   };
   const renderVideo = async () => {
     if (rendering) return;
-    if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) {
-      setNotice(labels.renderUnsupported); return;
-    }
     const duration = scenes.reduce((sum, scene) => sum + Math.max(1, Number(scene.seconds) || 1), 0);
-    if (duration > 600) { setNotice(labels.renderLimit); return; }
-    setRendering(true); setRenderProgress(0); setNotice("");
-    const canvas = document.createElement("canvas");
-    canvas.width = 1280; canvas.height = 720;
-    const ctx = canvas.getContext("2d");
-    const stream = canvas.captureStream(24);
-    let audioContext = null;
-    let narrationElement = null;
-    if (audioUrl) {
-      try {
-        audioContext = new AudioContext();
-        await audioContext.resume();
-        narrationElement = new Audio(audioUrl);
-        narrationElement.preload = "auto";
-        const source = audioContext.createMediaElementSource(narrationElement);
-        const destination = audioContext.createMediaStreamDestination();
-        source.connect(destination);
-        source.connect(audioContext.destination);
-        destination.stream.getAudioTracks().forEach(track => stream.addTrack(track));
-      } catch (audioError) {
-        stream.getTracks().forEach(track => track.stop());
-        setRendering(false);
-        setNotice("Narration audio could not be attached: " + audioError.message);
-        return;
-      }
-    }
-    const mimeType = ["video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"].find(type => MediaRecorder.isTypeSupported(type));
-    if (!mimeType) { setRendering(false); setNotice(labels.renderUnsupported); return; }
-    const chunks = [];
-    const recorder = new MediaRecorder(stream, {mimeType, videoBitsPerSecond: 2500000});
-    const finished = new Promise((resolve, reject) => {
-      recorder.ondataavailable = event => { if (event.data?.size) chunks.push(event.data); };
-      recorder.onerror = () => reject(new Error("Browser video encoder failed."));
-      recorder.onstop = () => resolve(new Blob(chunks, {type:mimeType}));
-    });
-    const wrap = (text, maxWidth) => {
-      const words = String(text || "").split(/\\s+/); const lines=[]; let line="";
-      for (const word of words) { const next=line ? line+" "+word : word; if(ctx.measureText(next).width>maxWidth && line){lines.push(line);line=word;} else line=next; }
-      if(line) lines.push(line); return lines;
-    };
-    const drawText = (text,x,y,maxWidth,lineHeight,maxLines=3) => {
-      const lines=wrap(text,maxWidth).slice(0,maxLines);
-      lines.forEach((line,index)=>ctx.fillText(line,x,y+index*lineHeight));
-    };
-    const drawFrame = (scene,index,elapsed,sceneDuration) => {
-      const gradient=ctx.createLinearGradient(0,0,1280,720);
-      const palettes=[["#10172e","#273d63"],["#17202b","#285b62"],["#24172f","#59406b"],["#101e35","#34507b"]];
-      const tonePalettes={cinematic:["#10172e","#273d63"],educational:["#123b35","#287a69"],"action-technology":["#24132f","#a13c4d"],documentary:["#29291f","#6c6548"],professional:["#102b46","#28749a"]};
-      const colors=tonePalettes[tone] || palettes[index%palettes.length]; gradient.addColorStop(0,colors[0]); gradient.addColorStop(1,colors[1]);
-      ctx.fillStyle=gradient; ctx.fillRect(0,0,1280,720);
-      const progress=Math.min(1,elapsed/Math.max(1,sceneDuration));
-      ctx.fillStyle="rgba(255,255,255,.07)"; ctx.beginPath(); ctx.arc(1080-progress*160,160,190,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle="#9fe7d3"; ctx.font="600 22px Arial"; ctx.fillText("FLOWCHERA21  /  VIDEO STUDIO",80,82);
-      ctx.fillStyle="#ffffff"; ctx.font="700 54px Arial"; drawText(title,80,190,1080,66,2);
-      ctx.fillStyle="#a9c5ff"; ctx.font="600 25px Arial"; ctx.fillText("SCENE "+String(index+1).padStart(2,"0")+"  ·  "+scene.title,80,330);
-      ctx.fillStyle="#ffffff"; ctx.font="400 32px Arial"; drawText(scene.visual,80,405,1080,44,3);
-      ctx.fillStyle="rgba(0,0,0,.34)"; ctx.fillRect(60,555,1160,112);
-      ctx.fillStyle="#ffffff"; ctx.font="400 25px Arial"; drawText(scene.narration || "",90,598,1100,34,2);
-      ctx.fillStyle="rgba(255,255,255,.25)"; ctx.fillRect(80,685,1120,5);
-      ctx.fillStyle="#9fe7d3"; ctx.fillRect(80,685,1120*progress,5);
-      const fadeIn = Math.min(1, elapsed / 0.7);
-      const fadeOut = Math.min(1, Math.max(0, (sceneDuration - elapsed) / 0.7));
-      ctx.fillStyle = "rgba(0,0,0," + (1 - Math.min(fadeIn, fadeOut)) + ")";
-      ctx.fillRect(0, 0, 1280, 720);
-    };
+    if (duration > 300) { setNotice(locale === "om" ? "Renderer bilisaa amma daqiiqaa 5 qofa deeggera." : locale === "am" ? "ነፃው ሬንደረር አሁን እስከ5 ደቂቃ ብቻ ይደግፋል።" : "The free server renderer currently supports up to 5 minutes per video."); return; }
+    setRendering(true); setRenderProgress(2); setNotice("");
     try {
-      recorder.start(250);
-      if (narrationElement) {
-        narrationElement.currentTime = 0;
-        await narrationElement.play();
+      const form = new FormData();
+      form.append("project", JSON.stringify({title, locale, tone: tone === "action-technology" ? "action" : tone, scenes}));
+      if (audioFile) form.append("audio", audioFile, audioFile.name);
+      const response = await fetch(RENDER_API + "/render", {method:"POST", body:form});
+      if (!response.ok) {
+        let detail = "Server video rendering failed (" + response.status + ").";
+        try { const payload = await response.json(); detail = payload.detail || detail; } catch {}
+        throw new Error(detail);
       }
-      const started=performance.now(); let elapsedTotal=0;
-      for(let i=0;i<scenes.length;i++){
-        const scene=scenes[i]; const seconds=Math.max(1,Number(scene.seconds)||1); const start=performance.now();
-        await new Promise(resolve=>{
-          const frame=now=>{
-            const elapsed=Math.min(seconds,(now-start)/1000);
-            drawFrame(scene,i,elapsed,seconds);
-            const done=elapsedTotal+elapsed; setRenderProgress(Math.min(99,Math.round(done/duration*100)));
-            if(elapsed<seconds) requestAnimationFrame(frame); else {elapsedTotal+=seconds;resolve();}
-          };
-          requestAnimationFrame(frame);
-        });
-      }
-      recorder.stop();
-      const blob=await finished;
-      if(!blob.size) throw new Error("The browser returned an empty video.");
-      const url=URL.createObjectURL(blob); const link=document.createElement("a");
-      link.href=url; const isMp4 = mimeType.startsWith("video/mp4");
-      link.download="flowchera21-"+Date.now()+(isMp4?".mp4":".webm"); link.click();
-      setTimeout(()=>URL.revokeObjectURL(url),60000);
-      setRenderProgress(100); setNotice(labels.renderDone + (isMp4 ? " (MP4)" : " (WebM — this browser does not expose MP4 encoding)"));
-    } catch(error) { try { if(recorder.state!=="inactive") recorder.stop(); } catch {} setNotice("Video rendering failed: "+(error.message||"unknown error")); }
-    finally { if (narrationElement) { narrationElement.pause(); narrationElement.currentTime=0; } if (audioContext && audioContext.state !== "closed") await audioContext.close(); stream.getTracks().forEach(track=>track.stop()); setRendering(false); }
+      setRenderProgress(85);
+      const blob = await response.blob();
+      if (!blob.size || blob.type !== "video/mp4") throw new Error("The server did not return a valid MP4 video.");
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url; link.download = "flowchera21-" + Date.now() + ".mp4"; link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+      setRenderProgress(100);
+      setNotice(locale === "om" ? "MP4 server irraa oomishameera; buufadhu." : locale === "am" ? "MP4 ቪዲዮ ተፈጥሯል፤ ያውርዱ።" : "Server-rendered MP4 is ready to download.");
+    } catch(error) {
+      setNotice((locale === "om" ? "MP4 oomishuun hin milkoofne: " : locale === "am" ? "MP4 ማዘጋጀት አልተሳካም፦ " : "MP4 rendering failed: ") + (error.message || "unknown error"));
+    } finally { setRendering(false); }
   };
   const formatSrtTime = (seconds) => {
     const ms = Math.max(0, Math.round(seconds * 1000));
@@ -248,9 +176,9 @@ export default function VideoStudio({ language = "en", onBack, standalone = fals
         <label>{labels.voice}<select value={voice} onChange={e=>setVoice(e.target.value)}>{labels.voices.map((v,i)=><option key={i} value={["adult-female","adult-male","young-adult","older-adult","child-role"][i]}>{v}</option>)}</select></label>
         <label>{labels.tone}<select value={tone} onChange={e=>setTone(e.target.value)}>{labels.tones.map((v,i)=><option key={i} value={["cinematic","educational","action-technology","documentary","professional"][i]}>{v}</option>)}</select></label>
         <div className="studio-actions"><button className="generate-btn" disabled={busy || !topic.trim()} onClick={generate}><Sparkles size={16}/>{busy ? labels.generating : labels.generate}</button><button className="secondary-btn" onClick={save}>{labels.save}</button></div>\n        <div className="studio-voice-tools"><button className="secondary-btn" disabled={!voiceReady || voiceBusy || !((script.trim()) || scenes.some(scene => scene.narration.trim())) || voice === "child-role"} onClick={generateVoice}><Mic2 size={16}/>{voiceBusy ? labels.voiceGenerating : labels.voiceGenerate}</button><span>{labels.voiceDisabled}</span></div>\n        <label className="studio-audio-upload">{locale === "om" ? "Sagalee MP3/WAV galchi" : locale === "am" ? "የMP3/WAV ትረካ ጨምር" : "Add narration audio (MP3/WAV)"}
-          <input type="file" accept="audio/*" onChange={event => { const file=event.target.files?.[0]; if(file){ if(audioUrl) URL.revokeObjectURL(audioUrl); setAudioUrl(URL.createObjectURL(file)); setNotice("Narration audio added to this video project."); } }} />
+          <input type="file" accept="audio/*" onChange={event => { const file=event.target.files?.[0]; if(file){ if(audioUrl) URL.revokeObjectURL(audioUrl); setAudioFile(file); setAudioUrl(URL.createObjectURL(file)); setNotice("Narration audio added to this video project."); } }} />
         </label>
-        {audioUrl && <div className="studio-audio-preview"><audio controls src={audioUrl}/><a href={audioUrl} download="flowchera21-narration.mp3">Download audio</a><button type="button" className="secondary-btn" onClick={()=>{URL.revokeObjectURL(audioUrl);setAudioUrl("");}}>Remove audio</button></div>}
+        {audioUrl && <div className="studio-audio-preview"><audio controls src={audioUrl}/><a href={audioUrl} download="flowchera21-narration.mp3">Download audio</a><button type="button" className="secondary-btn" onClick={()=>{URL.revokeObjectURL(audioUrl);setAudioUrl("");setAudioFile(null);}}>Remove audio</button></div>}
         {notice && <p className="studio-notice" role="status">{notice}</p>}
       </section>
       <section className="studio-card">
