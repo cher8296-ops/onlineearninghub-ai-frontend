@@ -249,7 +249,7 @@ def download_video_job(job_id: str):
 
 @app.get("/health")
 def health():
-    return {"status":"healthy","renderer":"ffmpeg-h264-aac","max_duration_seconds":MAX_TOTAL_SECONDS,"languages":["om","en","am"]}
+    return {"status":"healthy","renderer":"ffmpeg-h264-aac","max_duration_seconds":MAX_JOB_SECONDS,"synchronous_max_duration_seconds":MAX_TOTAL_SECONDS,"async_jobs":True,"queue_max_jobs":5,"languages":["om","en","am"],"voice_generation":False}
 
 @app.post("/render")
 async def render(project: str = Form(...), audio: UploadFile | None = File(default=None)):
