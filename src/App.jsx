@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import VideoStudio from "./VideoStudio.jsx";
 import {
-  ArrowRight, ArrowUpRight, Check, CheckCircle2, ChevronRight, Clipboard,
+  ArrowRight, ArrowUpRight, Clapperboard, Check, CheckCircle2, ChevronRight, Clipboard,
   Clock3, Command, FileCheck2, Globe2, History, Layers3, LoaderCircle,
   Menu, Microscope, Moon, PenLine, Plus, RefreshCw, ShieldCheck, Sparkles,
   Sun, WandSparkles, X, Zap, Trash2, Copy, ExternalLink, Share2
@@ -242,6 +243,7 @@ function App() {
           <button className={`nav-item ${view === "workspace" ? "active" : ""}`} onClick={() => { setView("workspace"); setMobileNav(false); }}>
             <span className="nav-icon neutral"><Command size={17}/></span><span>{ui.workspace}</span><ChevronRight className="nav-chevron" size={15}/>
           </button>
+          <button className={`nav-item ${view === "video" ? "active" : ""}`} onClick={() => { setView("video"); setMobileNav(false); }}><span className="nav-icon neutral"><Clapperboard size={17}/></span><span>{language === "om" ? "Video Studio" : "Video Studio"}</span><span className="nav-chevron"><Sparkles size={14}/></span></button>
           <button className={`nav-item ${view === "history" ? "active" : ""}`} onClick={() => { setView("history"); setMobileNav(false); }}>
             <span className="nav-icon neutral"><History size={17}/></span><span>{ui.activity}</span><span className="nav-count">{history.length}</span>
           </button>
@@ -293,7 +295,7 @@ function App() {
         </header>
 
         <div className="content">
-          {view === "workspace" ? (
+          {view === "video" ? <VideoStudio language={language} onBack={() => setView("workspace")} /> : view === "workspace" ? (
             <>
               <section className="hero">
                 <div className="hero-copy">
