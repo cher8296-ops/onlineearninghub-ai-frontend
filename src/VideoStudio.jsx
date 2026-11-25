@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Clapperboard, Download, Film, Languages, Mic2, Plus, Sparkles, Trash2, WandSparkles } from "lucide-react";
 
 const API = (import.meta.env.VITE_API_BASE_URL || "https://onlineearninghub-ai.onrender.com").replace(/\/+$/, "");
+const RENDER_API = (import.meta.env.VITE_VIDEO_RENDER_API || "https://flowchera21-mp4-renderer.onrender.com").replace(/\/+$/, "");
 const KEY = "flowchera21-video-studio-v1";
 const initialScenes = [
   { title: "Opening hook", seconds: 12, visual: "Cinematic establishing shot and title reveal", narration: "Start with a clear question that makes the audience curious." },
