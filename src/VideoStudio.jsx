@@ -60,7 +60,7 @@ export default function VideoStudio({ language = "en", onBack, standalone = fals
     setBusy(true); setNotice("");
     const prompt = [
       "Create a production-ready video script and shot plan. Do not claim footage, audio or video has been rendered.",
-      "Project: " + title, "Topic: " + topic, "Language: " + locale, "Format: " + format,
+      "Project: " + title, "Topic: " + topic, "Language: " + ({om:"Afaan Oromoo",en:"English",am:"Amharic"}[locale] || locale), "Format: " + format,
       "Voice role: " + voice, "Creative direction: " + tone,
       "Target duration seconds: " + totalSeconds,
       "Scene outline: " + scenes.map((s,i) => (i+1)+". "+s.title+" ("+s.seconds+"s), visual: "+s.visual+", narration: "+s.narration).join("\n"),
@@ -82,7 +82,7 @@ export default function VideoStudio({ language = "en", onBack, standalone = fals
       return;
     }
     if (narration.length > 4000) {
-      setNotice("For safety and predictable API costs, split narration into sections of 4,000 characters or fewer.");
+      setNotice(labels.voiceTooLong);
       return;
     }
     setVoiceBusy(true); setNotice("");
@@ -100,8 +100,8 @@ export default function VideoStudio({ language = "en", onBack, standalone = fals
       const blob = await response.blob();
       if (!blob.size || !blob.type.includes("audio")) throw new Error("The voice service returned an invalid audio file.");
       setAudioUrl(current => { if (current) URL.revokeObjectURL(current); return URL.createObjectURL(blob); });
-      setNotice("Narration audio generated. Listen and review pronunciation before publishing.");
-    } catch (error) { setNotice("Voice generation failed: " + (error.message || "network error")); }
+      setNotice(labels.voiceGenerated);
+    } catch (error) { setNotice(labels.voiceFailure + (error.message || "network error")); }
     finally { setVoiceBusy(false); }
   };
   const updateScene = (index, key, value) => setScenes(current => current.map((scene,i) => i === index ? {...scene,[key]:value} : scene));
@@ -124,7 +124,7 @@ export default function VideoStudio({ language = "en", onBack, standalone = fals
         </div>
         <label>{labels.voice}<select value={voice} onChange={e=>setVoice(e.target.value)}>{labels.voices.map((v,i)=><option key={i} value={["adult-female","adult-male","young-adult","older-adult","child-role"][i]}>{v}</option>)}</select></label>
         <label>{labels.tone}<select value={tone} onChange={e=>setTone(e.target.value)}>{labels.tones.map((v,i)=><option key={i} value={["cinematic","educational","action-technology","documentary","professional"][i]}>{v}</option>)}</select></label>
-        <div className="studio-actions"><button className="generate-btn" disabled={busy || !topic.trim()} onClick={generate}><Sparkles size={16}/>{busy ? labels.generating : labels.generate}</button><button className="secondary-btn" onClick={save}>{labels.save}</button></div>\n        <div className="studio-voice-tools"><button className="secondary-btn" disabled={!voiceReady || voiceBusy || !((script.trim()) || scenes.some(scene => scene.narration.trim())) || voice === "child-role"} onClick={generateVoice}><Mic2 size={16}/>{voiceBusy ? "Generating audio…" : "Generate narration audio"}</button><span>{voiceReady ? "Voice API enabled" : "Voice API disabled until the owner enables paid TTS"}</span></div>\n        {audioUrl && <div className="studio-audio-preview"><audio controls src={audioUrl}/><a href={audioUrl} download="flowchera21-narration.mp3">Download MP3</a></div>}
+        <div className="studio-actions"><button className="generate-btn" disabled={busy || !topic.trim()} onClick={generate}><Sparkles size={16}/>{busy ? labels.generating : labels.generate}</button><button className="secondary-btn" onClick={save}>{labels.save}</button></div>\n        <div className="studio-voice-tools"><button className="secondary-btn" disabled={!voiceReady || voiceBusy || !((script.trim()) || scenes.some(scene => scene.narration.trim())) || voice === "child-role"} onClick={generateVoice}><Mic2 size={16}/>{voiceBusy ? labels.voiceGenerating : labels.voiceGenerate}</button><span>{voiceReady ? labels.voiceEnabled : labels.voiceDisabled}</span></div>\n        {audioUrl && <div className="studio-audio-preview"><audio controls src={audioUrl}/><a href={audioUrl} download="flowchera21-narration.mp3">Download MP3</a></div>}
         {notice && <p className="studio-notice" role="status">{notice}</p>}
       </section>
       <section className="studio-card">
@@ -140,4 +140,4 @@ export default function VideoStudio({ language = "en", onBack, standalone = fals
     </div>
     <section className="studio-card studio-script"><div className="studio-section-head"><h2><Mic2 size={18}/> {labels.script}</h2><span>{locale.toUpperCase()} · {voice}</span></div><textarea value={script} onChange={e=>{setScript(e.target.value);setSaved(false);}} rows={14} placeholder={om ? "Script AI'n uumame asitti mul'ata; yookaan harkaan barreessi..." : "Your generated script appears here, or write your own..."}/><div className="studio-actions"><button className="generate-btn" onClick={exportBrief}><Download size={16}/>{labels.export}</button><button className="secondary-btn" onClick={save}>{labels.save}</button>{onBack && <button className="secondary-btn" onClick={onBack}><ArrowLeft size={15}/>{labels.back}</button>}</div></section>
   </section>;
-}
+},voiceGenerate:"Sagalee AI uumi",voiceGenerating:"Sagalee qopheessaa jira…",voiceEnabled:"Tajaajilli sagalee hojii irra jira",voiceDisabled:"Tajaajilli sagalee kaffaltii qabu hanga abbaa sirnichaa eeyyamutti cufameera",voiceGenerated:"Sagaleen uumameera. Maxxansuu dura dhaggeeffadhu; sagalee Afaan Oromoo mirkaneessi.",voiceTooLong:"Barruu sagalee kutaa 4,000 character gadiitti qoodi.",voiceFailure:"Sagalee uumuu hin dandeenye: ",voiceGenerate:"Generate AI narration",voiceGenerating:"Generating narration…",voiceEnabled:"Voice service is enabled",voiceDisabled:"Paid voice service is off until the site owner enables it",voiceGenerated:"Narration audio generated. Listen and review pronunciation before publishing.",voiceTooLong:"Split narration into sections of 4,000 characters or fewer.",voiceFailure:"Voice generation failed: "
