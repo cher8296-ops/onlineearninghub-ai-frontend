@@ -129,7 +129,7 @@ test("Video Studio opens from workspace navigation and exposes production planni
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: /Video Studio/ }).click();
   await expect(page.getByRole("heading", { name: "FlowChera21 Video Studio" })).toBeVisible();
-  await expect(page.getByText(/videos for free in your browser/i)).toBeVisible();
+  await expect(page.getByText(/short motion-graphic videos in your browser/i)).toBeVisible();
   await expect(page.getByLabel("Video topic")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Scene storyboard" })).toBeVisible();
 });
@@ -164,8 +164,12 @@ test("Video Studio renders and downloads a real browser-recorded video file", as
   const durations = page.locator(".scene-card input[type='number']");
   const count = await durations.count();
   for (let index = 0; index < count; index++) await durations.nth(index).fill("1");
+  const subtitleDownloadPromise = page.waitForEvent("download", { timeout: 10000 });
+  await page.getByRole("button", { name: /Download subtitles/i }).click();
+  const subtitleDownload = await subtitleDownloadPromise;
+  expect(subtitleDownload.suggestedFilename()).toMatch(/\\.srt$/i);
   const downloadPromise = page.waitForEvent("download", { timeout: 20000 });
-  await page.getByRole("button", { name: /Create free video \(WebM\)/ }).click();
+  await page.getByRole("button", { name: /Create short video/i }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toMatch(/\.webm$/i);
 });
