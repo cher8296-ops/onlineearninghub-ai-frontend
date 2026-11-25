@@ -147,7 +147,7 @@ def _render_job(job_id, data, audio_payload, audio_name):
                         message=f"Rendered scene {i+1} of {len(scenes)}")
         _job_update(job_id, stage="assembling", progress=84, message="Assembling MP4")
         concat_file = job_dir / "concat.txt"
-        concat_file.write_text("".join(f"file '{p.as_posix()}'\\n" for p in clips), encoding="utf-8")
+        concat_file.write_text("".join(f"file '{p.as_posix()}'\n" for p in clips), encoding="utf-8")
         silent = job_dir / "silent.mp4"
         run_ffmpeg(["-f","concat","-safe","0","-i",str(concat_file),"-c","copy",
                     "-movflags","+faststart",str(silent)])
